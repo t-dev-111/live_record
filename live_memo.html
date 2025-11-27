@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ライブ記録</title>
+    <!-- Tailwind CSS CDNを読み込みます -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* カスタムスクロールバー（目立たないように） */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1; /* slate-300 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background-color: #f8fafc; /* slate-50 */
+        }
+        /* メインのフォント設定 */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* Blue-gray-100 */
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- ヘッダー -->
+    <header class="bg-gray-800 text-white shadow-lg sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto p-4 flex justify-between items-center">
+            <h1 class="text-2xl font-extrabold tracking-tight">🎶 My Live Records</h1>
+            <div class="flex space-x-3">
+                <button id="toggleAddForm" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded-lg shadow-md transition-colors text-sm">
+                    ライブを追加
+                </button>
+                <button id="toggleFilter" class="p-2 rounded-lg hover:bg-gray-700 transition-colors md:hidden text-sm">
+                    絞り込み
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツエリア -->
+    <main class="max-w-4xl mx-auto p-4">
+        
+        <!-- ライブ追加フォーム (認証後表示) -->
+        <div id="addRecordSection" class="bg-white p-4 rounded-xl shadow-2xl mb-6 hidden border-l-4 border-blue-500">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">ライブ記録追加・編集・削除</h2>
+
+            <!-- パスワード認証エリア -->
+            <div id="authArea">
+                <p class="text-sm text-gray-500 mb-3 font-medium">※ パスワード認証により、ライブ予定の追加・編集が可能です。</p>
+                <div class="flex space-x-2">
+                    <input type="password" id="passwordInput" placeholder="パスワードを入力" class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    <button id="authenticateBtn" class="bg-gray-700 hover:bg-gray-800 text-white font-semibold py-3 px-5 rounded-lg transition-colors">認証</button>
+                </div>
+                <p id="authMessage" class="mt-2 text-sm text-red-500"></p>
+            </div>
+            
+            <!-- ライブ追加フォーム (認証成功後) -->
+            <form id="addRecordForm" class="hidden mt-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="newDate" class="block text-sm font-medium text-gray-700">日付 *</label>
+                        <input type="date" id="newDate" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="newLiveName" class="block text-sm font-medium text-gray-700">ライブ名 *</label>
+                        <input type="text" id="newLiveName" placeholder="例: Channel U Tour 2025" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="newArtist" class="block text-sm font-medium text-gray-700">アーティスト名 *</label>
+                        <input type="text" id="newArtist" placeholder="例: 緑黄色社会" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="newVenue" class="block text-sm font-medium text-gray-700">会場名 *</label>
+                        <input type="text" id="newVenue" placeholder="例: 水戸市民会館" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label for="newSeatType" class="block text-sm font-medium text-gray-700">席種 (任意)</label>
+                        <input type="text" id="newSeatType" placeholder="例: 1階 15列 11番" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="newTicketImageFile" class="block text-sm font-medium text-gray-700">チケット画像ファイル (任意)</label>
+                        <input type="file" id="newTicketImageFile" accept="image/*" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="newImageFile" class="block text-sm font-medium text-gray-700">ライブ画像ファイル (任意)</label>
+                        <input type="file" id="newImageFile" accept="image/*" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <!-- セットリスト入力エリア (新規追加用) -->
+                <div class="mb-6" id="addSetlistArea">
+                    <!-- JSでここにセットリストエディタが挿入されます -->
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-md">
+                    ライブ予定を登録
+                </button>
+                <p id="addMessage" class="mt-2 text-sm text-green-600"></p>
+            </form>
+        </div>
+
+        <!-- フィルタリング/検索エリア (モバイルでは非表示/トグル) -->
+        <div id="filterArea" class="bg-white p-4 rounded-xl shadow-md mb-6 md:block">
+            <h2 class="text-lg font-semibold text-gray-700 mb-3">ライブ記録を検索・絞り込み</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input type="text" id="searchKeyword" placeholder="ライブ名、バンド名、会場、席種、楽曲名で検索" class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                <select id="filterVenue" class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">全ての会場</option>
+                    <!-- オプションはJSで動的に追加されます -->
+                </select>
+            </div>
+        </div>
+
+        <!-- 記録一覧表示エリア - 今後の予定 -->
+        <h2 id="upcomingTitle" class="text-2xl font-bold text-gray-700 mb-4 mt-6 border-b-2 border-blue-500 pb-1">📅 Upcoming Lives (今後の予定)</h2>
+        <section id="upcomingList" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></section>
+
+        <!-- 記録一覧表示エリア - 終了済み -->
+        <h2 id="pastTitle" class="text-2xl font-bold text-gray-700 mb-4 mt-10 border-b-2 border-gray-400 pb-1">🎤 Past Lives (終了済み)</h2>
+        <section id="pastList" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></section>
+
+        <!-- 結果なしメッセージ -->
+        <div id="noResults" class="hidden text-center p-12 bg-white rounded-xl shadow-md mt-6">
+            <p class="text-xl text-gray-500 font-medium">お探しのライブ記録は見つかりませんでした。</p>
+            <p class="text-gray-400 mt-2">検索条件を変更して再度お試しください。</p>
+        </div>
+    </main>
+
+    <!-- ライブ詳細/編集モーダル (オーバーレイ) -->
+    <div id="detailModal" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 flex items-center justify-center p-4 hidden transition-opacity duration-300" onclick="closeModal(event)">
+        <div class="bg-white w-full max-w-2xl max-h-[90vh] rounded-xl shadow-2xl overflow-y-auto transform scale-95 opacity-0 transition-all duration-300" role="dialog" aria-modal="true" aria-labelledby="modalTitle" onclick="event.stopPropagation()">
+            <div class="p-6">
+                <!-- 閉じるボタンと編集ボタン -->
+                <div class="flex justify-between items-center mb-4">
+                    <div id="editButtons" class="space-x-2">
+                        <!-- 編集・削除ボタン (JSで追加) -->
+                    </div>
+                    <button class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal()">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <!-- モーダルコンテンツ (詳細表示 or 編集フォーム) -->
+                <div id="modalContent">
+                    <!-- 詳細コンテンツ/編集フォームがJSによってここに挿入されます -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 削除確認モーダル -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-[60] flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-sm rounded-xl p-6 shadow-2xl">
+            <h3 class="text-xl font-bold text-red-600 mb-4">🚨 記録の削除確認</h3>
+            <p class="mb-6 text-gray-700">本当にこのライブ記録を削除しますか？一度削除すると元に戻せません。</p>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeDeleteConfirmModal()" class="px-4 py-2 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition-colors">キャンセル</button>
+                <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors">削除する</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- セキュリティと認証用の定数 ---
+        // SHA-256ハッシュ値: 'maru0118' -> eb28853c3f343b83dbca201d27050f6d873b3da473aad7eeecd8f50722461861
+        const CORRECT_PASSWORD_HASH = 'eb28853c3f343b83dbca201d27050f6d873b3da473aad7eeecd8f50722461861';
+        const MAX_ATTEMPTS = 20;
+        const LOCKOUT_DURATION_MS = 30 * 60 * 1000; // 30分間のロックアウト
+
+        let isAuthSuccessful = false; 
+
+        // --- SHA-256ハッシュ関数 ---
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);                    
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        // --- ロックアウト状態の確認 ---
+        function checkLockout() {
+            const lockoutEnd = localStorage.getItem('lockoutEnd');
+            const attempts = parseInt(localStorage.getItem('authAttempts') || '0');
+            const now = Date.now();
+            
+            if (lockoutEnd && parseInt(lockoutEnd) > now) {
+                const remaining = Math.ceil((parseInt(lockoutEnd) - now) / 60000);
+                authMessage.textContent = `認証に失敗しすぎたため、残り ${remaining} 分間ロックされています。`;
+                authMessage.className = "mt-2 text-sm text-red-600 font-bold";
+                authenticateBtn.disabled = true;
+                passwordInput.disabled = true;
+                return true;
+            } else if (attempts >= MAX_ATTEMPTS) {
+                localStorage.removeItem('authAttempts');
+                localStorage.removeItem('lockoutEnd');
+            }
+            authenticateBtn.disabled = false;
+            passwordInput.disabled = false;
+            return false;
+        }
+
+        // --- ライブ記録データと基本ロジック ---
+        
+        // ライブ記録の初期データ (ID: 1-23)
+        const initialRecords = [
+            { id: 1, date: "2022-05-01", liveName: "Actor Tour 2022", artist: "緑黄色社会", venue: "福岡サンパレス", image: "", ticketImage: "", seatType: "1階 10列 1番", setlist: ["Actor", "LITMUS", "Mela!", "Shout Baby", "S.T.A.R."] },
+            { id: 2, date: "2022-11-27", liveName: "LIVE TOUR 2022 Labo.", artist: "Snow man", venue: "マリンメッセ福岡", image: "", ticketImage: "", seatType: "アリーナ Aブロック 10番", setlist: ["D.D.", "ブラザービート", "オレンジkiss", "JUICY", "Secret Touch"] },
+            { id: 3, date: "2023-06-10", liveName: "pink blue tour 2023", artist: "緑黄色社会", venue: "福岡サンパレス", image: "", ticketImage: "", seatType: "2階 1列 20番", setlist: ["サマータイムシンデレラ", "始まりの歌", "Sabotage", "一歩", "花になって"] },
+            { id: 4, date: "2024-03-09", liveName: "LIVE TOUR VVS", artist: "SixTONES", venue: "福岡paypayドーム", image: "", ticketImage: "", seatType: "スタンド 5塁側 10通路", setlist: ["こっから", "NAVIGATOR", "Imitation Rain", "NEW ERA", "Good Luck!"] },
+            { id: 5, date: "2024-03-30", liveName: "Arena Tour 2024 Gates+", artist: "美少年", venue: "横浜アリーナ", image: "", ticketImage: "", seatType: "センター席 10ブロック 1番", setlist: ["未来が始まる", "Cosmic Melody", "Beautiful Love", "LALA LOVE", "虹の中で"] },
+            { id: 6, date: "2024-06-16", liveName: "緑黄色社会大夜祭", artist: "緑黄色社会", venue: "横浜アリーナ", image: "", ticketImage: "", seatType: "アリーナ席 5列 5番", setlist: ["恋をしよう", "Re", "Party!!", "にちようび", "あの頃の歌"] },
+            { id: 7, date: "2024-11-10", liveName: "YOASOBI DOME LIVE 2024", artist: "YOASOBI", venue: "東京ドーム", image: "", ticketImage: "", seatType: "バルコニー席 1列 1番", setlist: ["アイドル", "夜に駆ける", "群青", "祝福", "勇者"] },
+            { id: 8, date: "2024-11-23", liveName: "LIVE HOUSE TOUR Laugh", artist: "緑黄色社会", venue: "Zepp Haneda", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 9, date: "2024-12-15", liveName: "Snow Man Dome Tour 2024 RAVS", artist: "Snow Man", venue: "東京ドーム", image: "", ticketImage: "", seatType: "アリーナ", setlist: [] },
+            { id: 10, date: "2025-04-04", liveName: "CENTRAL STAGE", artist: "緑黄色社会/乃木坂46", venue: "Kアリーナ横浜", image: "", ticketImage: "", seatType: "アリーナ", setlist: [] },
+            { id: 11, date: "2025-04-06", liveName: "Echoes Baa", artist: "YOASOBI/FRUITS ZIPPER etc", venue: "横浜赤レンガ倉庫", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 12, date: "2025-05-02", liveName: "Channel U Tour 2025", artist: "FRUITS ZIPPER", venue: "水戸市民会館", image: "", ticketImage: "", seatType: "1階 15列 11番", setlist: [] },
+            { id: 13, date: "2025-07-05", liveName: "Channel Me", artist: "緑黄色社会", venue: "東京体育館", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 14, date: "2025-07-20", liveName: "ASOBI EXPO", artist: "きゃりーぱみゅぱみゅ/新しい学校のリーダーズ/FRUITS ZIPPER/CUTIE STREET/Kizuna AI/Touka/Rung Ruler", venue: "幕張メッセ国際展示場 9・10・11ホール", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 15, date: "2025-08-02", liveName: "FRUITS ZIPPER 3rd ANNIVERSARY", artist: "FRUITS ZIPPER", venue: "さいたまスーパーアリーナ", image: "", ticketImage: "", seatType: "200レベル 2列 333番", setlist: [] },
+            { id: 16, date: "2025-08-30", liveName: "超ときめき♡宣伝部のきみのハートにロックオンTOUR 2025 10th Anniversary", artist: "超ときめき♡宣伝部", venue: "パシフィコ横浜国立大ホール", image: "", ticketImage: "", seatType: "2階通路線側", setlist: [] },
+            { id: 17, date: "2025-09-19", liveName: "音楽の日フェス", artist: "FRUITS ZIPPER/CANDY TUNE/SWEET STEADY", venue: "東京ガーデンシアター", image: "", ticketImage: "", seatType: "アリーナ 3列 10番", setlist: [] },
+            { id: 18, date: "2025-10-04", liveName: "はちゃめちゃわちゃわちゃライブ", artist: "FRUITS ZIPPER", venue: "豊洲PIT 8ホール", image: "", ticketImage: "", seatType: "C1ブロック列2番（端）", setlist: [] },
+            { id: 19, date: "2025-10-07", liveName: "COSMIC CIRCUS", artist: "緑黄色社会/Aqua Timez", venue: "Zepp羽田", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 20, date: "2025-10-13", liveName: "CUTIE STREET 1st ANNIVERSARY JAPAN TOUR 2025「CAN'T STOP CUTIE.」", artist: "CUTIE STREET", venue: "ぴあアリーナMM", image: "", ticketImage: "https://placehold.co/100x100/e5e7eb/737373?text=Ticket", seatType: "アリーナCブロック 4列 6番", setlist: [] },
+            { id: 21, date: "2025-11-17", liveName: "SWEET STEADY JAPAN TOUR 2025 - AUTUMN -Collection", artist: "SWEET STEADY", venue: "Zepp DiverCity", image: "", ticketImage: "https://placehold.co/100x100/e5e7eb/737373?text=Ticket", seatType: "", setlist: [] },
+            { id: 22, date: "2025-12-13", liveName: "KAWAII.LAB SESSION", artist: "FRUITS ZIPPER/CANDY TUNE/SWEET STEADY/CUTIE STREET", venue: "Kアリーナ横浜", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 23, date: "2026-02-04", liveName: "FRUITS ZIPPER SPECIAL LIVE 2026", artist: "FRUITS ZIPPER", venue: "東京ドーム", image: "", ticketImage: "", seatType: "", setlist: [] },
+        ];
+        
+        // localStorageからライブ記録をロード
+        const loadRecords = () => {
+            let records = JSON.parse(localStorage.getItem('userLiveRecords') || 'null');
+            
+            if (records === null || records.length === 0) {
+                records = initialRecords.map(record => ({...record}));
+                localStorage.setItem('userLiveRecords', JSON.stringify(records));
+            }
+
+            return records;
+        };
+
+        let liveRecords = loadRecords();
+
+        // ライブ記録をlocalStorageに保存する関数
+        const saveRecords = () => {
+            localStorage.setItem('userLiveRecords', JSON.stringify(liveRecords));
+        };
+        
+        // HTML要素の参照
+        const upcomingList = document.getElementById('upcomingList');
+        const pastList = document.getElementById('pastList');
+        const searchKeyword = document.getElementById('searchKeyword');
+        const filterVenue = document.getElementById('filterVenue');
+        const detailModal = document.getElementById('detailModal');
+        const modalContent = document.getElementById('modalContent');
+        const editButtons = document.getElementById('editButtons');
+        const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const toggleAddFormBtn = document.getElementById('toggleAddForm');
+        const addRecordSection = document.getElementById('addRecordSection');
+        const addRecordForm = document.getElementById('addRecordForm');
+        const addMessage = document.getElementById('addMessage');
+        const addSetlistArea = document.getElementById('addSetlistArea');
+        const authArea = document.getElementById('authArea');
+        const passwordInput = document.getElementById('passwordInput');
+        const authenticateBtn = document.getElementById('authenticateBtn');
+        const authMessage = document.getElementById('authMessage');
+        const toggleFilterBtn = document.getElementById('toggleFilter');
+        const filterArea = document.getElementById('filterArea');
+        
+        let recordToDeleteId = null;
+
+        // モーダルを閉じる
+        const closeModal = (event) => {
+            // モーダルの背景をクリックした場合のみ閉じる
+            if (event && event.target !== detailModal) return;
+
+            detailModal.classList.remove('opacity-100');
+            detailModal.querySelector('.max-w-2xl').classList.replace('scale-100', 'scale-95');
+            detailModal.querySelector('.max-w-2xl').classList.replace('opacity-100', 'opacity-0');
+            setTimeout(() => {
+                detailModal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 300);
+        };
+        
+        // 削除確認モーダルを開く
+        const openDeleteConfirmModal = (id) => {
+            recordToDeleteId = id;
+            deleteConfirmModal.classList.remove('hidden');
+        };
+
+        // 削除確認モーダルを閉じる
+        const closeDeleteConfirmModal = () => {
+            recordToDeleteId = null;
+            deleteConfirmModal.classList.add('hidden');
+        };
+
+        // --- セットリスト編集用UIの動的生成 ---
+        // mode: 'add' (新規追加用) または 'edit' (編集用)
+        const renderSetlistEditor = (setlist, mode) => {
+            const containerId = `${mode}SetlistEditorContainer`;
+            const inputId = `${mode}NewSongInput`;
+            
+            // 現在のセットリストの内容を生成
+            const itemsHtml = setlist.map((song, index) => `
+                <div class="flex items-center space-x-2 mb-2 setlist-item">
+                    <span class="text-gray-400 font-bold w-6 text-right">${index + 1}.</span>
+                    <input type="text" value="${song}" class="flex-grow p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 setlist-song-input">
+                    <button type="button" onclick="removeSetlistItem(this, '${containerId}')" class="text-red-500 hover:text-red-700 p-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+            `).join('');
+
+            return `
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">セットリスト</label>
+                    <div id="${containerId}">
+                        ${itemsHtml}
+                    </div>
+                    <div class="flex mt-3 space-x-2">
+                        <input type="text" id="${inputId}" placeholder="曲名を入力" class="flex-grow p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addSetlistItem('${mode}');}">
+                        <button type="button" onclick="addSetlistItem('${mode}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium transition-colors">
+                            追加
+                        </button>
+                    </div>
+                </div>
+            `;
+        };
+
+        // セットリストに項目を追加する関数 (Global Scope)
+        // mode: 'add' or 'edit'
+        window.addSetlistItem = (mode) => {
+            const containerId = `${mode}SetlistEditorContainer`;
+            const inputId = `${mode}NewSongInput`;
+            
+            const input = document.getElementById(inputId);
+            const songName = input.value.trim();
+            if (!songName) return;
+
+            const container = document.getElementById(containerId);
+            const index = container.children.length + 1;
+            
+            const div = document.createElement('div');
+            div.className = 'flex items-center space-x-2 mb-2 setlist-item';
+            div.innerHTML = `
+                <span class="text-gray-400 font-bold w-6 text-right">${index}.</span>
+                <input type="text" value="${songName}" class="flex-grow p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 setlist-song-input">
+                <button type="button" onclick="removeSetlistItem(this, '${containerId}')" class="text-red-500 hover:text-red-700 p-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            `;
+            
+            container.appendChild(div);
+            input.value = '';
+            input.focus();
+            
+            // 番号の振り直し（念のため）
+            renumberSetlist(containerId);
+        };
+
+        // セットリストから項目を削除する関数 (Global Scope)
+        window.removeSetlistItem = (btn, containerId) => {
+            const item = btn.closest('.setlist-item');
+            item.remove();
+            renumberSetlist(containerId);
+        };
+
+        // 番号を振り直す関数
+        const renumberSetlist = (containerId) => {
+            const container = document.getElementById(containerId);
+            const items = container.querySelectorAll('.setlist-item');
+            items.forEach((item, idx) => {
+                const numSpan = item.querySelector('span');
+                if (numSpan) numSpan.textContent = `${idx + 1}.`;
+            });
+        };
+
+        // 詳細表示コンテンツをレンダリングする関数
+        const renderDetailContent = (record, isEditMode = false) => {
+            if (isEditMode) {
+                // 編集モードのフォームをレンダリング
+                modalContent.innerHTML = `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">ライブ記録の編集</h2>
+                    <form id="editForm" onsubmit="event.preventDefault(); saveEditedRecord(${record.id});">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="editDate" class="block text-sm font-medium text-gray-700">日付 *</label>
+                                <input type="date" id="editDate" value="${record.date}" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="editLiveName" class="block text-sm font-medium text-gray-700">ライブ名 *</label>
+                                <input type="text" id="editLiveName" value="${record.liveName}" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="editArtist" class="block text-sm font-medium text-gray-700">アーティスト名 *</label>
+                                <input type="text" id="editArtist" value="${record.artist}" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="editVenue" class="block text-sm font-medium text-gray-700">会場名 *</label>
+                                <input type="text" id="editVenue" value="${record.venue}" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label for="editSeatType" class="block text-sm font-medium text-gray-700">席種 (任意)</label>
+                                <input type="text" id="editSeatType" value="${record.seatType || ''}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label for="editTicketImageFile" class="block text-sm font-medium text-gray-700">チケット画像 (変更する場合)</label>
+                                <input type="file" id="editTicketImageFile" accept="image/*" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                ${record.ticketImage ? '<p class="text-xs text-gray-500 mt-1">※ 現在画像が設定されています</p>' : ''}
+                            </div>
+                            <div>
+                                <label for="editImageFile" class="block text-sm font-medium text-gray-700">ライブ画像 (変更する場合)</label>
+                                <input type="file" id="editImageFile" accept="image/*" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                ${record.image ? '<p class="text-xs text-gray-500 mt-1">※ 現在画像が設定されています</p>' : ''}
+                            </div>
+                        </div>
+                        
+                        <!-- セットリスト編集エリア (editモード) -->
+                        <div class="mb-6">
+                            ${renderSetlistEditor(record.setlist || [], 'edit')}
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-md">
+                            変更を保存
+                        </button>
+                        <button type="button" onclick="cancelEditMode(${record.id})" class="w-full mt-2 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-md">
+                            キャンセル
+                        </button>
+                        <p id="editMessage" class="mt-2 text-sm text-green-600"></p>
+                    </form>
+                `;
+                // 編集ボタンを非表示にし、キャンセルボタンのスペースを確保
+                editButtons.innerHTML = ''; 
+            } else {
+                // 詳細表示をレンダリング
+                const isUpcoming = new Date(record.date) >= new Date(new Date().setHours(0, 0, 0, 0));
+                
+                modalContent.innerHTML = `
+                    <h2 class="text-3xl font-extrabold text-gray-900 mb-2">${record.liveName}</h2>
+                    <p class="text-xl text-blue-600 mb-4">${record.artist}</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-gray-700 mb-1">📅 日付 / 会場</h3>
+                            <p class="text-lg">${record.date}</p>
+                            <p class="text-md text-gray-600">${record.venue}</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-gray-700 mb-1">🎫 席種</h3>
+                            <p class="text-lg">${record.seatType || '情報なし'}</p>
+                        </div>
+                    </div>
+
+                    ${record.image ? `
+                        <h3 class="font-semibold text-gray-700 mb-2">📸 ライブ画像</h3>
+                        <img src="${record.image}" alt="ライブ画像" class="w-full h-auto rounded-xl shadow-lg mb-6 object-cover max-h-80">
+                    ` : ''}
+
+                    ${record.ticketImage ? `
+                        <h3 class="font-semibold text-gray-700 mb-2">🎫 チケット画像</h3>
+                        <img src="${record.ticketImage}" alt="チケット画像" class="w-full h-auto rounded-xl shadow-lg mb-6 object-cover max-h-80">
+                    ` : ''}
+                    
+                    ${!isUpcoming && record.setlist && record.setlist.length > 0 ? `
+                        <h3 class="font-semibold text-gray-700 mb-2 mt-4 border-b pb-1">🎵 セットリスト</h3>
+                        <ul class="list-none space-y-1">
+                            ${record.setlist.map((song, index) => `<li class="text-gray-700 pl-4 relative before:content-['#'] before:absolute before:left-0 before:font-bold before:text-blue-400">${index + 1}. ${song}</li>`).join('')}
+                        </ul>
+                    ` : !isUpcoming ? `
+                        <p class="text-gray-500 mt-4">セットリストの記録はありません。</p>
+                    ` : ''}
+
+                `;
+            }
+        };
+
+        // 編集モードに入る
+        const enterEditMode = (id) => {
+            const record = liveRecords.find(r => r.id === id);
+            if (!record || !isAuthSuccessful) return;
+            renderDetailContent(record, true);
+        };
+
+        // 編集モードをキャンセル
+        const cancelEditMode = (id) => {
+            const record = liveRecords.find(r => r.id === id);
+            if (!record) return;
+            // 詳細表示に戻る
+            openModal(id); 
+        };
+
+        // 画像ファイルをBase64に変換する関数
+        const fileToBase64 = (file) => {
+            return new Promise((resolve, reject) => {
+                if (!file) {
+                    resolve('');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        };
+
+        // 編集内容を保存
+        const saveEditedRecord = async (id) => {
+            const recordIndex = liveRecords.findIndex(r => r.id === id);
+            if (recordIndex === -1 || !isAuthSuccessful) return;
+
+            const editDate = document.getElementById('editDate').value;
+            const editLiveName = document.getElementById('editLiveName').value;
+            const editArtist = document.getElementById('editArtist').value;
+            const editVenue = document.getElementById('editVenue').value;
+            const editSeatType = document.getElementById('editSeatType').value;
+            
+            // セットリストの取得ロジック (編集用コンテナから)
+            const setlistContainer = document.getElementById('editSetlistEditorContainer');
+            const setlistInputs = setlistContainer.querySelectorAll('.setlist-song-input');
+            const editSetlist = Array.from(setlistInputs)
+                .map(input => input.value.trim())
+                .filter(s => s.length > 0);
+
+            const editTicketImageFile = document.getElementById('editTicketImageFile').files[0];
+            const editImageFile = document.getElementById('editImageFile').files[0];
+            const editMessage = document.getElementById('editMessage');
+
+            if (!editDate || !editLiveName || !editArtist || !editVenue) {
+                editMessage.textContent = '日付、ライブ名、アーティスト名、会場名は必須です。';
+                editMessage.className = "mt-2 text-sm text-red-600 font-bold";
+                return;
+            }
+
+            // 画像の処理: ファイルが選択されていればBase64に変換、されていなければ既存の値を保持
+            const newTicketImage = editTicketImageFile ? await fileToBase64(editTicketImageFile) : liveRecords[recordIndex].ticketImage;
+            const newImage = editImageFile ? await fileToBase64(editImageFile) : liveRecords[recordIndex].image;
+
+            // レコードを更新
+            liveRecords[recordIndex] = {
+                ...liveRecords[recordIndex],
+                date: editDate,
+                liveName: editLiveName,
+                artist: editArtist,
+                venue: editVenue,
+                seatType: editSeatType,
+                setlist: editSetlist,
+                ticketImage: newTicketImage,
+                image: newImage,
+            };
+
+            saveRecords();
+            editMessage.textContent = '変更を保存しました！';
+            editMessage.className = "mt-2 text-sm text-green-600 font-bold";
+            
+            // 2秒後に詳細表示に戻り、モーダルを更新
+            setTimeout(() => {
+                openModal(id);
+                populateVenueFilter();
+                filterRecords();
+            }, 1000);
+        };
+
+
+        // モーダルを開き、詳細をレンダリングする関数 (編集機能のボタン追加)
+        const openModal = (id) => {
+            const record = liveRecords.find(r => r.id === id);
+            if (!record) return;
+
+            // 編集/削除ボタンの表示制御
+            editButtons.innerHTML = '';
+            if (isAuthSuccessful) {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm shadow-md';
+                editBtn.textContent = '編集';
+                editBtn.onclick = (e) => { e.stopPropagation(); enterEditMode(record.id); };
+                editButtons.appendChild(editBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm shadow-md';
+                deleteBtn.textContent = '削除';
+                deleteBtn.onclick = (e) => { e.stopPropagation(); openDeleteConfirmModal(record.id); };
+                editButtons.appendChild(deleteBtn);
+            }
+
+            // 詳細コンテンツの描画
+            renderDetailContent(record);
+            
+            detailModal.classList.remove('hidden');
+            setTimeout(() => {
+                detailModal.classList.add('opacity-100');
+                detailModal.querySelector('.max-w-2xl').classList.replace('scale-95', 'scale-100');
+                detailModal.querySelector('.max-w-2xl').classList.replace('opacity-0', 'opacity-100');
+            }, 10);
+
+            document.body.style.overflow = 'hidden'; 
+        };
+        
+        // 削除処理
+        const deleteRecord = () => {
+            if (recordToDeleteId === null) return;
+
+            const index = liveRecords.findIndex(r => r.id === recordToDeleteId);
+            if (index !== -1) {
+                liveRecords.splice(index, 1);
+                
+                saveRecords(); 
+                filterRecords();
+                closeModal();
+                closeDeleteConfirmModal();
+            }
+        };
+
+        // 会場選択肢を動的に生成
+        const populateVenueFilter = () => {
+            const venues = liveRecords.map(r => r.venue).filter(Boolean);
+            const uniqueVenues = [...new Set(venues)].sort();
+            
+            filterVenue.innerHTML = '<option value="">全ての会場</option>';
+            uniqueVenues.forEach(venue => {
+                const option = document.createElement('option');
+                option.value = venue;
+                option.textContent = venue;
+                filterVenue.appendChild(option);
+            });
+        };
+
+        // 記録をフィルタリング・ソートして一覧をレンダリング
+        const filterRecords = () => {
+            const keyword = searchKeyword.value.toLowerCase();
+            const selectedVenue = filterVenue.value;
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+
+            const filteredRecords = liveRecords.filter(record => {
+                const matchesKeyword = (
+                    record.liveName.toLowerCase().includes(keyword) ||
+                    record.artist.toLowerCase().includes(keyword) ||
+                    record.venue.toLowerCase().includes(keyword) ||
+                    record.seatType.toLowerCase().includes(keyword) ||
+                    record.setlist.some(song => song.toLowerCase().includes(keyword))
+                );
+                
+                const matchesVenue = !selectedVenue || record.venue === selectedVenue;
+
+                return matchesKeyword && matchesVenue;
+            }).sort((a, b) => new Date(a.date) - new Date(b.date)); // 日付で昇順ソート
+
+            upcomingList.innerHTML = '';
+            pastList.innerHTML = '';
+            let upcomingCount = 0;
+            let pastCount = 0;
+
+            filteredRecords.forEach(record => {
+                const liveDate = new Date(record.date);
+                const isUpcoming = liveDate >= now;
+                
+                const list = isUpcoming ? upcomingList : pastList;
+                if (isUpcoming) upcomingCount++; else pastCount++;
+
+                const card = document.createElement('div');
+                card.className = `bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer overflow-hidden transform hover:scale-[1.01] ${isUpcoming ? 'border-t-4 border-blue-500' : 'border-t-4 border-gray-400'}`;
+                card.onclick = () => openModal(record.id);
+                
+                const dateParts = record.date.split('-');
+                const monthDay = `${dateParts[1]}/${dateParts[2]}`;
+                const year = dateParts[0];
+
+                card.innerHTML = `
+                    <div class="relative h-40">
+                        <img src="${record.image || record.ticketImage || `https://placehold.co/600x400/e5e7eb/737373?text=${encodeURIComponent(record.artist)}`}" 
+                             alt="ライブ画像" 
+                             class="w-full h-full object-cover"
+                             onerror="this.onerror=null; this.src='https://placehold.co/600x400/e5e7eb/737373?text=${encodeURIComponent(record.artist)}'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-gray-900/70 to-transparent"></div>
+                        <div class="absolute top-0 right-0 m-2 bg-white/90 text-gray-800 text-sm font-bold py-1 px-3 rounded-full shadow-md">
+                            ${isUpcoming ? '予定' : '終了'}
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <p class="text-xs text-gray-500">${year}</p>
+                        <p class="text-2xl font-extrabold text-blue-600 mb-1">${monthDay}</p>
+                        <h3 class="text-xl font-bold text-gray-900 truncate">${record.liveName}</h3>
+                        <p class="text-sm text-gray-600 truncate">${record.artist} @ ${record.venue}</p>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+
+            // 結果なしメッセージの表示
+            const hasResults = upcomingCount > 0 || pastCount > 0;
+            document.getElementById('noResults').classList.toggle('hidden', hasResults);
+            upcomingList.classList.toggle('hidden', upcomingCount === 0 && !document.getElementById('noResults').classList.contains('hidden'));
+            pastList.classList.toggle('hidden', pastCount === 0 && !document.getElementById('noResults').classList.contains('hidden'));
+            document.getElementById('upcomingTitle').classList.toggle('hidden', upcomingCount === 0);
+            document.getElementById('pastTitle').classList.toggle('hidden', pastCount === 0);
+        };
+        
+        // --- 認証ロジック ---
+        authenticateBtn.addEventListener('click', async () => {
+            if (checkLockout()) return;
+
+            const password = passwordInput.value;
+            if (!password) {
+                authMessage.textContent = 'パスワードを入力してください。';
+                authMessage.className = "mt-2 text-sm text-red-500";
+                return;
+            }
+
+            try {
+                const inputHash = await sha256(password);
+                if (inputHash === CORRECT_PASSWORD_HASH) {
+                    isAuthSuccessful = true;
+                    authMessage.textContent = '認証成功！ライブの追加・編集が可能になりました。';
+                    authMessage.className = "mt-2 text-sm text-green-600 font-bold";
+                    authArea.classList.add('hidden');
+                    addRecordForm.classList.remove('hidden');
+                    
+                    // 成功時は試行回数をリセット
+                    localStorage.removeItem('authAttempts');
+                    localStorage.removeItem('lockoutEnd');
+                    
+                    // 認証後、一覧を更新して編集ボタンを表示可能にする
+                    filterRecords();
+                    
+                    // 新規追加用セットリストエディタの初期化
+                    addSetlistArea.innerHTML = renderSetlistEditor([], 'add');
+
+                } else {
+                    let attempts = parseInt(localStorage.getItem('authAttempts') || '0');
+                    attempts++;
+                    localStorage.setItem('authAttempts', attempts);
+                    
+                    if (attempts >= MAX_ATTEMPTS) {
+                        localStorage.setItem('lockoutEnd', Date.now() + LOCKOUT_DURATION_MS);
+                        checkLockout(); // ロックアウトメッセージを表示
+                    } else {
+                        authMessage.textContent = `認証失敗。残り ${MAX_ATTEMPTS - attempts} 回でロックされます。`;
+                        authMessage.className = "mt-2 text-sm text-red-500";
+                    }
+                    passwordInput.value = '';
+                }
+            } catch (error) {
+                console.error("Hashing error:", error);
+                authMessage.textContent = '認証処理中にエラーが発生しました。';
+                authMessage.className = "mt-2 text-sm text-red-500";
+            }
+        });
+
+        // --- ライブ追加フォームのイベントリスナー ---
+        addRecordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!isAuthSuccessful) return;
+
+            // フォームデータの取得
+            const newDate = document.getElementById('newDate').value;
+            const newLiveName = document.getElementById('newLiveName').value;
+            const newArtist = document.getElementById('newArtist').value;
+            const newVenue = document.getElementById('newVenue').value;
+            const newSeatType = document.getElementById('newSeatType').value;
+            
+            // セットリストの取得ロジック (新規追加用コンテナから)
+            const setlistContainer = document.getElementById('addSetlistEditorContainer');
+            const setlistInputs = setlistContainer.querySelectorAll('.setlist-song-input');
+            const newSetlist = Array.from(setlistInputs)
+                .map(input => input.value.trim())
+                .filter(s => s.length > 0);
+
+            const newTicketImageFile = document.getElementById('newTicketImageFile').files[0];
+            const newImageFile = document.getElementById('newImageFile').files[0];
+
+            if (!newDate || !newLiveName || !newArtist || !newVenue) {
+                addMessage.textContent = '日付、ライブ名、アーティスト名、会場名は必須です。';
+                addMessage.className = "mt-2 text-sm text-red-600 font-bold";
+                return;
+            }
+
+            const newTicketImage = await fileToBase64(newTicketImageFile);
+            const newImage = await fileToBase64(newImageFile);
+
+            const newRecord = {
+                id: Date.now(),
+                date: newDate,
+                liveName: newLiveName,
+                artist: newArtist,
+                venue: newVenue,
+                image: newImage,
+                ticketImage: newTicketImage,
+                seatType: newSeatType,
+                setlist: newSetlist
+            };
+
+            liveRecords.push(newRecord);
+            
+            saveRecords(); 
+
+            addRecordForm.reset();
+            // セットリストエディタもリセット
+            addSetlistArea.innerHTML = renderSetlistEditor([], 'add');
+            
+            addMessage.textContent = `「${newLiveName}」の予定を追加しました！`;
+            addMessage.className = "mt-2 text-sm text-green-600 font-bold";
+
+            populateVenueFilter();
+            filterRecords();
+        });
+
+
+        // --- イベントリスナーの設定 ---
+        searchKeyword.addEventListener('input', filterRecords);
+        filterVenue.addEventListener('change', filterRecords);
+        confirmDeleteBtn.addEventListener('click', deleteRecord);
+
+        // ライブ追加フォームの表示/非表示切り替え
+        toggleAddFormBtn.addEventListener('click', () => {
+            addRecordSection.classList.toggle('hidden');
+            // 非表示にする際はメッセージをクリア
+            if (addRecordSection.classList.contains('hidden')) {
+                authMessage.textContent = '';
+                addMessage.textContent = '';
+            }
+            // 認証エリアが非表示ならフォームもリセット
+            if (isAuthSuccessful) {
+                addRecordForm.reset();
+                addSetlistArea.innerHTML = renderSetlistEditor([], 'add');
+            }
+        });
+
+        // モバイル向けフィルターエリアの表示/非表示切り替え
+        toggleFilterBtn.addEventListener('click', () => {
+            filterArea.classList.toggle('hidden');
+        });
+
+
+        // --- 初期化処理 ---
+        window.onload = () => {
+            // モバイルでの初期表示制御
+            if (window.innerWidth < 768) {
+                filterArea.classList.add('hidden');
+            }
+            populateVenueFilter();
+            filterRecords(); 
+            checkLockout();
+            
+            // 認証済みであれば追加用セットリストエリアを初期化
+            if (isAuthSuccessful) {
+                addSetlistArea.innerHTML = renderSetlistEditor([], 'add');
+            }
+        };
+
+    </script>
+
+</body>
+</html>
