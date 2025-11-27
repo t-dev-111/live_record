@@ -44,7 +44,7 @@
 
     <!-- メインコンテンツエリア -->
     <main class="max-w-4xl mx-auto p-4">
-        
+
         <!-- ライブ追加フォーム (認証後表示) -->
         <div id="addRecordSection" class="bg-white p-4 rounded-xl shadow-2xl mb-6 hidden border-l-4 border-blue-500">
             <h2 class="text-xl font-bold text-gray-800 mb-4">ライブ記録追加・編集・削除</h2>
@@ -58,7 +58,7 @@
                 </div>
                 <p id="authMessage" class="mt-2 text-sm text-red-500"></p>
             </div>
-            
+
             <!-- ライブ追加フォーム (認証成功後) -->
             <form id="addRecordForm" class="hidden mt-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -147,7 +147,7 @@
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
-                
+
                 <!-- モーダルコンテンツ (詳細表示 or 編集フォーム) -->
                 <div id="modalContent">
                     <!-- 詳細コンテンツ/編集フォームがJSによってここに挿入されます -->
@@ -191,7 +191,7 @@
             const lockoutEnd = localStorage.getItem('lockoutEnd');
             const attempts = parseInt(localStorage.getItem('authAttempts') || '0');
             const now = Date.now();
-            
+
             if (lockoutEnd && parseInt(lockoutEnd) > now) {
                 const remaining = Math.ceil((parseInt(lockoutEnd) - now) / 60000);
                 authMessage.textContent = `認証に失敗しすぎたため、残り ${remaining} 分間ロックされています。`;
@@ -209,7 +209,7 @@
         }
 
         // --- ライブ記録データと基本ロジック ---
-        
+
         // ライブ記録の初期データ (ID: 1-23)
         const initialRecords = [
             { id: 1, date: "2022-05-01", liveName: "Actor Tour 2022", artist: "緑黄色社会", venue: "福岡サンパレス", image: "", ticketImage: "", seatType: "1階 10列 1番", setlist: ["Actor", "LITMUS", "Mela!", "Shout Baby", "S.T.A.R."] },
@@ -236,16 +236,26 @@
             { id: 22, date: "2025-12-13", liveName: "KAWAII.LAB SESSION", artist: "FRUITS ZIPPER/CANDY TUNE/SWEET STEADY/CUTIE STREET", venue: "Kアリーナ横浜", image: "", ticketImage: "", seatType: "", setlist: [] },
             { id: 23, date: "2026-02-04", liveName: "FRUITS ZIPPER SPECIAL LIVE 2026", artist: "FRUITS ZIPPER", venue: "東京ドーム", image: "", ticketImage: "", seatType: "", setlist: [] },
         ];
-        
+
         // localStorageからライブ記録をロード
         const loadRecords = () => {
             let records = JSON.parse(localStorage.getItem('userLiveRecords') || 'null');
-            
+
             if (records === null || records.length === 0) {
                 records = initialRecords.map(record => ({...record}));
-                localStorage.setItem('userLiveRecords', JSON.stringify(records));
             }
 
+            // 互換性のため、既存のstring配列を新しい形式に変換する
+            records.forEach(r => {
+                if (!Array.isArray(r.setlist)) r.setlist = [];
+                r.setlist = r.setlist.map(item => {
+                    if (typeof item === 'string') return { type: 'song', title: item };
+                    // 既に新形式ならそのまま
+                    return item;
+                });
+            });
+
+            localStorage.setItem('userLiveRecords', JSON.stringify(records));
             return records;
         };
 
@@ -255,7 +265,7 @@
         const saveRecords = () => {
             localStorage.setItem('userLiveRecords', JSON.stringify(liveRecords));
         };
-        
+
         // HTML要素の参照
         const upcomingList = document.getElementById('upcomingList');
         const pastList = document.getElementById('pastList');
@@ -277,7 +287,7 @@
         const authMessage = document.getElementById('authMessage');
         const toggleFilterBtn = document.getElementById('toggleFilter');
         const filterArea = document.getElementById('filterArea');
-        
+
         let recordToDeleteId = null;
 
         // モーダルを閉じる
@@ -293,7 +303,7 @@
                 document.body.style.overflow = '';
             }, 300);
         };
-        
+
         // 削除確認モーダルを開く
         const openDeleteConfirmModal = (id) => {
             recordToDeleteId = id;
@@ -306,22 +316,36 @@
             deleteConfirmModal.classList.add('hidden');
         };
 
-        // --- セットリスト編集用UIの動的生成 ---
+        // --- セットリスト編集用UIの動的生成 (曲+セクション対応) ---
         // mode: 'add' (新規追加用) または 'edit' (編集用)
         const renderSetlistEditor = (setlist, mode) => {
             const containerId = `${mode}SetlistEditorContainer`;
             const inputId = `${mode}NewSongInput`;
-            
-            // 現在のセットリストの内容を生成
-            const itemsHtml = setlist.map((song, index) => `
-                <div class="flex items-center space-x-2 mb-2 setlist-item">
-                    <span class="text-gray-400 font-bold w-6 text-right">${index + 1}.</span>
-                    <input type="text" value="${song}" class="flex-grow p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 setlist-song-input">
-                    <button type="button" onclick="removeSetlistItem(this, '${containerId}')" class="text-red-500 hover:text-red-700 p-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                </div>
-            `).join('');
+
+            // setlistは配列の要素が {type:'song'|'section', title: '...'} の形式
+            const itemsHtml = setlist.map((item, index) => {
+                if (item.type === 'section') {
+                    return `
+                        <div class="flex items-center space-x-2 mb-2 setlist-item">
+                            <span class="text-gray-400 font-bold w-6 text-right">-</span>
+                            <input type="text" value="${item.title}" class="flex-grow p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 setlist-song-input font-bold text-blue-600">
+                            <button type="button" onclick="removeSetlistItem(this, '${containerId}')" class="text-red-500 hover:text-red-700 p-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="flex items-center space-x-2 mb-2 setlist-item">
+                            <span class="text-gray-400 font-bold w-6 text-right">${index + 1}.</span>
+                            <input type="text" value="${item.title}" class="flex-grow p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 setlist-song-input">
+                            <button type="button" onclick="removeSetlistItem(this, '${containerId}')" class="text-red-500 hover:text-red-700 p-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    `;
+                }
+            }).join('');
 
             return `
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -332,8 +356,14 @@
                     <div class="flex mt-3 space-x-2">
                         <input type="text" id="${inputId}" placeholder="曲名を入力" class="flex-grow p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addSetlistItem('${mode}');}">
                         <button type="button" onclick="addSetlistItem('${mode}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium transition-colors">
-                            追加
+                            曲追加
                         </button>
+                    </div>
+
+                    <div class="flex mt-3 space-x-2">
+                        <button type="button" onclick="addSection('${mode}', '衣装替え')" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded">衣装替え追加</button>
+                        <button type="button" onclick="addSection('${mode}', 'アンコール')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">アンコール追加</button>
+                        <button type="button" onclick="addSection('${mode}', 'メドレー')" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded">メドレー追加</button>
                     </div>
                 </div>
             `;
@@ -344,29 +374,53 @@
         window.addSetlistItem = (mode) => {
             const containerId = `${mode}SetlistEditorContainer`;
             const inputId = `${mode}NewSongInput`;
-            
+
             const input = document.getElementById(inputId);
             const songName = input.value.trim();
             if (!songName) return;
 
             const container = document.getElementById(containerId);
-            const index = container.children.length + 1;
-            
+
             const div = document.createElement('div');
             div.className = 'flex items-center space-x-2 mb-2 setlist-item';
             div.innerHTML = `
-                <span class="text-gray-400 font-bold w-6 text-right">${index}.</span>
+                <span class="text-gray-400 font-bold w-6 text-right">-</span>
                 <input type="text" value="${songName}" class="flex-grow p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 setlist-song-input">
                 <button type="button" onclick="removeSetlistItem(this, '${containerId}')" class="text-red-500 hover:text-red-700 p-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
             `;
-            
+
+            // ensure the input is recognized as a song (remove font-bold if any)
+            const newInput = div.querySelector('.setlist-song-input');
+            newInput.classList.remove('font-bold');
+            newInput.classList.remove('text-blue-600');
+
             container.appendChild(div);
             input.value = '';
             input.focus();
-            
-            // 番号の振り直し（念のため）
+
+            // 番号の振り直し（歌のみを数える）
+            renumberSetlist(containerId);
+        };
+
+        // セクション（衣装替え/アンコール等）を追加する
+        window.addSection = (mode, title) => {
+            const containerId = `${mode}SetlistEditorContainer`;
+            const container = document.getElementById(containerId);
+
+            const div = document.createElement('div');
+            div.className = 'flex items-center space-x-2 mb-2 setlist-item';
+
+            div.innerHTML = `
+                <span class="text-gray-400 font-bold w-6 text-right">-</span>
+                <input type="text" value="${title}" class="flex-grow p-2 border border-gray-300 rounded setlist-song-input font-bold text-blue-600">
+                <button type="button" onclick="removeSetlistItem(this, '${containerId}')" class="text-red-500 hover:text-red-700 p-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            `;
+
+            container.appendChild(div);
             renumberSetlist(containerId);
         };
 
@@ -377,13 +431,23 @@
             renumberSetlist(containerId);
         };
 
-        // 番号を振り直す関数
+        // 番号を振り直す関数（歌だけを連番にする。セクションは '-' 表示）
         const renumberSetlist = (containerId) => {
             const container = document.getElementById(containerId);
             const items = container.querySelectorAll('.setlist-item');
-            items.forEach((item, idx) => {
+            let songIndex = 0;
+            items.forEach((item) => {
                 const numSpan = item.querySelector('span');
-                if (numSpan) numSpan.textContent = `${idx + 1}.`;
+                const input = item.querySelector('.setlist-song-input');
+                if (!numSpan || !input) return;
+
+                const isSection = input.classList.contains('font-bold');
+                if (isSection) {
+                    numSpan.textContent = '-';
+                } else {
+                    songIndex++;
+                    numSpan.textContent = `${songIndex}.`;
+                }
             });
         };
 
@@ -428,7 +492,7 @@
                                 ${record.image ? '<p class="text-xs text-gray-500 mt-1">※ 現在画像が設定されています</p>' : ''}
                             </div>
                         </div>
-                        
+
                         <!-- セットリスト編集エリア (editモード) -->
                         <div class="mb-6">
                             ${renderSetlistEditor(record.setlist || [], 'edit')}
@@ -448,11 +512,11 @@
             } else {
                 // 詳細表示をレンダリング
                 const isUpcoming = new Date(record.date) >= new Date(new Date().setHours(0, 0, 0, 0));
-                
+
                 modalContent.innerHTML = `
                     <h2 class="text-3xl font-extrabold text-gray-900 mb-2">${record.liveName}</h2>
                     <p class="text-xl text-blue-600 mb-4">${record.artist}</p>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="font-semibold text-gray-700 mb-1">📅 日付 / 会場</h3>
@@ -474,11 +538,19 @@
                         <h3 class="font-semibold text-gray-700 mb-2">🎫 チケット画像</h3>
                         <img src="${record.ticketImage}" alt="チケット画像" class="w-full h-auto rounded-xl shadow-lg mb-6 object-cover max-h-80">
                     ` : ''}
-                    
+
                     ${!isUpcoming && record.setlist && record.setlist.length > 0 ? `
                         <h3 class="font-semibold text-gray-700 mb-2 mt-4 border-b pb-1">🎵 セットリスト</h3>
                         <ul class="list-none space-y-1">
-                            ${record.setlist.map((song, index) => `<li class="text-gray-700 pl-4 relative before:content-['#'] before:absolute before:left-0 before:font-bold before:text-blue-400">${index + 1}. ${song}</li>`).join('')}
+                            ${record.setlist.map((item, idx) => {
+                                if (item.type === 'section') {
+                                    return `<li class="text-blue-600 font-bold mt-2">--- ${item.title} ---</li>`;
+                                } else {
+                                    // count song index up to this point
+                                    const songNum = record.setlist.slice(0, idx+1).filter(it => it.type === 'song').length;
+                                    return `<li class="text-gray-700 pl-4 relative before:content-['#'] before:absolute before:left-0 before:font-bold before:text-blue-400">${songNum}. ${item.title}</li>`;
+                                }
+                            }).join('')}
                         </ul>
                     ` : !isUpcoming ? `
                         <p class="text-gray-500 mt-4">セットリストの記録はありません。</p>
@@ -527,13 +599,16 @@
             const editArtist = document.getElementById('editArtist').value;
             const editVenue = document.getElementById('editVenue').value;
             const editSeatType = document.getElementById('editSeatType').value;
-            
+
             // セットリストの取得ロジック (編集用コンテナから)
             const setlistContainer = document.getElementById('editSetlistEditorContainer');
-            const setlistInputs = setlistContainer.querySelectorAll('.setlist-song-input');
-            const editSetlist = Array.from(setlistInputs)
-                .map(input => input.value.trim())
-                .filter(s => s.length > 0);
+            const setlistItems = setlistContainer.querySelectorAll('.setlist-item');
+            const editSetlist = Array.from(setlistItems).map(item => {
+                const input = item.querySelector('.setlist-song-input');
+                const title = input.value.trim();
+                const isSection = input.classList.contains('font-bold');
+                return isSection ? { type: 'section', title } : { type: 'song', title };
+            }).filter(i => i.title && i.title.length > 0);
 
             const editTicketImageFile = document.getElementById('editTicketImageFile').files[0];
             const editImageFile = document.getElementById('editImageFile').files[0];
@@ -565,8 +640,8 @@
             saveRecords();
             editMessage.textContent = '変更を保存しました！';
             editMessage.className = "mt-2 text-sm text-green-600 font-bold";
-            
-            // 2秒後に詳細表示に戻り、モーダルを更新
+
+            // 1秒後に詳細表示に戻り、モーダルを更新
             setTimeout(() => {
                 openModal(id);
                 populateVenueFilter();
@@ -598,7 +673,7 @@
 
             // 詳細コンテンツの描画
             renderDetailContent(record);
-            
+
             detailModal.classList.remove('hidden');
             setTimeout(() => {
                 detailModal.classList.add('opacity-100');
@@ -608,7 +683,7 @@
 
             document.body.style.overflow = 'hidden'; 
         };
-        
+
         // 削除処理
         const deleteRecord = () => {
             if (recordToDeleteId === null) return;
@@ -616,7 +691,7 @@
             const index = liveRecords.findIndex(r => r.id === recordToDeleteId);
             if (index !== -1) {
                 liveRecords.splice(index, 1);
-                
+
                 saveRecords(); 
                 filterRecords();
                 closeModal();
@@ -628,7 +703,7 @@
         const populateVenueFilter = () => {
             const venues = liveRecords.map(r => r.venue).filter(Boolean);
             const uniqueVenues = [...new Set(venues)].sort();
-            
+
             filterVenue.innerHTML = '<option value="">全ての会場</option>';
             uniqueVenues.forEach(venue => {
                 const option = document.createElement('option');
@@ -651,9 +726,10 @@
                     record.artist.toLowerCase().includes(keyword) ||
                     record.venue.toLowerCase().includes(keyword) ||
                     record.seatType.toLowerCase().includes(keyword) ||
-                    record.setlist.some(song => song.toLowerCase().includes(keyword))
+                    // setlist中の曲/セクションタイトルも検索対象
+                    record.setlist.some(item => item.title && item.title.toLowerCase().includes(keyword))
                 );
-                
+
                 const matchesVenue = !selectedVenue || record.venue === selectedVenue;
 
                 return matchesKeyword && matchesVenue;
@@ -667,14 +743,14 @@
             filteredRecords.forEach(record => {
                 const liveDate = new Date(record.date);
                 const isUpcoming = liveDate >= now;
-                
+
                 const list = isUpcoming ? upcomingList : pastList;
                 if (isUpcoming) upcomingCount++; else pastCount++;
 
                 const card = document.createElement('div');
                 card.className = `bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow cursor-pointer overflow-hidden transform hover:scale-[1.01] ${isUpcoming ? 'border-t-4 border-blue-500' : 'border-t-4 border-gray-400'}`;
                 card.onclick = () => openModal(record.id);
-                
+
                 const dateParts = record.date.split('-');
                 const monthDay = `${dateParts[1]}/${dateParts[2]}`;
                 const year = dateParts[0];
@@ -708,7 +784,7 @@
             document.getElementById('upcomingTitle').classList.toggle('hidden', upcomingCount === 0);
             document.getElementById('pastTitle').classList.toggle('hidden', pastCount === 0);
         };
-        
+
         // --- 認証ロジック ---
         authenticateBtn.addEventListener('click', async () => {
             if (checkLockout()) return;
@@ -728,14 +804,14 @@
                     authMessage.className = "mt-2 text-sm text-green-600 font-bold";
                     authArea.classList.add('hidden');
                     addRecordForm.classList.remove('hidden');
-                    
+
                     // 成功時は試行回数をリセット
                     localStorage.removeItem('authAttempts');
                     localStorage.removeItem('lockoutEnd');
-                    
+
                     // 認証後、一覧を更新して編集ボタンを表示可能にする
                     filterRecords();
-                    
+
                     // 新規追加用セットリストエディタの初期化
                     addSetlistArea.innerHTML = renderSetlistEditor([], 'add');
 
@@ -743,7 +819,7 @@
                     let attempts = parseInt(localStorage.getItem('authAttempts') || '0');
                     attempts++;
                     localStorage.setItem('authAttempts', attempts);
-                    
+
                     if (attempts >= MAX_ATTEMPTS) {
                         localStorage.setItem('lockoutEnd', Date.now() + LOCKOUT_DURATION_MS);
                         checkLockout(); // ロックアウトメッセージを表示
@@ -763,7 +839,7 @@
         // --- ライブ追加フォームのイベントリスナー ---
         addRecordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             if (!isAuthSuccessful) return;
 
             // フォームデータの取得
@@ -772,13 +848,16 @@
             const newArtist = document.getElementById('newArtist').value;
             const newVenue = document.getElementById('newVenue').value;
             const newSeatType = document.getElementById('newSeatType').value;
-            
+
             // セットリストの取得ロジック (新規追加用コンテナから)
             const setlistContainer = document.getElementById('addSetlistEditorContainer');
-            const setlistInputs = setlistContainer.querySelectorAll('.setlist-song-input');
-            const newSetlist = Array.from(setlistInputs)
-                .map(input => input.value.trim())
-                .filter(s => s.length > 0);
+            const setlistItems = setlistContainer ? setlistContainer.querySelectorAll('.setlist-item') : [];
+            const newSetlist = Array.from(setlistItems).map(item => {
+                const input = item.querySelector('.setlist-song-input');
+                const title = input ? input.value.trim() : '';
+                const isSection = input && input.classList.contains('font-bold');
+                return isSection ? { type: 'section', title } : { type: 'song', title };
+            }).filter(i => i.title && i.title.length > 0);
 
             const newTicketImageFile = document.getElementById('newTicketImageFile').files[0];
             const newImageFile = document.getElementById('newImageFile').files[0];
@@ -805,13 +884,13 @@
             };
 
             liveRecords.push(newRecord);
-            
+
             saveRecords(); 
 
             addRecordForm.reset();
             // セットリストエディタもリセット
             addSetlistArea.innerHTML = renderSetlistEditor([], 'add');
-            
+
             addMessage.textContent = `「${newLiveName}」の予定を追加しました！`;
             addMessage.className = "mt-2 text-sm text-green-600 font-bold";
 
@@ -855,7 +934,7 @@
             populateVenueFilter();
             filterRecords(); 
             checkLockout();
-            
+
             // 認証済みであれば追加用セットリストエリアを初期化
             if (isAuthSuccessful) {
                 addSetlistArea.innerHTML = renderSetlistEditor([], 'add');
