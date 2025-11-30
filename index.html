@@ -64,7 +64,7 @@
                 <!-- カテゴリ選択 -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">カテゴリ *</label>
-                    <div class="flex space-x-4">
+                    <div class="flex flex-wrap gap-4">
                         <label class="inline-flex items-center cursor-pointer">
                             <input type="radio" name="newType" value="live" checked class="form-radio text-blue-600 h-5 w-5">
                             <span class="ml-2 text-gray-800 font-bold">🎤 ライブ</span>
@@ -72,6 +72,10 @@
                         <label class="inline-flex items-center cursor-pointer">
                             <input type="radio" name="newType" value="event" class="form-radio text-orange-500 h-5 w-5">
                             <span class="ml-2 text-gray-800 font-bold">🎪 イベント</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="newType" value="other" class="form-radio text-green-500 h-5 w-5">
+                            <span class="ml-2 text-gray-800 font-bold">🎸 その他</span>
                         </label>
                     </div>
                 </div>
@@ -226,7 +230,7 @@
         // --- ライブ記録データと基本ロジック ---
 
         // ライブ記録の初期データ (ID: 1-23)
-        // type: 'live' or 'event' を追加
+        // type: 'live', 'event', 'other' をサポート
         const initialRecords = [
             { id: 1, type: "live", date: "2022-05-01", liveName: "Actor Tour 2022", artist: "緑黄色社会", venue: "福岡サンパレス", image: "", ticketImage: "", seatType: "1階 10列 1番", setlist: ["Actor", "LITMUS", "Mela!", "Shout Baby", "S.T.A.R."] },
             { id: 2, type: "live", date: "2022-11-27", liveName: "LIVE TOUR 2022 Labo.", artist: "Snow man", venue: "マリンメッセ福岡", image: "", ticketImage: "", seatType: "アリーナ Aブロック 10番", setlist: ["D.D.", "ブラザービート", "オレンジkiss", "JUICY", "Secret Touch"] },
@@ -500,7 +504,9 @@
 
         // 詳細表示コンテンツをレンダリングする関数
         const renderDetailContent = (record, isEditMode = false) => {
-            const typeLabel = record.type === 'event' ? 'イベント' : 'ライブ';
+            let typeLabel = 'ライブ';
+            if (record.type === 'event') typeLabel = 'イベント';
+            if (record.type === 'other') typeLabel = 'その他';
             
             if (isEditMode) {
                 // 編集モードのフォームをレンダリング
@@ -510,7 +516,7 @@
                         <!-- カテゴリ編集 -->
                         <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
                             <label class="block text-sm font-medium text-gray-700 mb-2">カテゴリ</label>
-                            <div class="flex space-x-4">
+                            <div class="flex flex-wrap gap-4">
                                 <label class="inline-flex items-center cursor-pointer">
                                     <input type="radio" name="editType" value="live" ${record.type === 'live' ? 'checked' : ''} class="form-radio text-blue-600 h-5 w-5">
                                     <span class="ml-2 text-gray-800 font-bold">🎤 ライブ</span>
@@ -518,6 +524,10 @@
                                 <label class="inline-flex items-center cursor-pointer">
                                     <input type="radio" name="editType" value="event" ${record.type === 'event' ? 'checked' : ''} class="form-radio text-orange-500 h-5 w-5">
                                     <span class="ml-2 text-gray-800 font-bold">🎪 イベント</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="editType" value="other" ${record.type === 'other' ? 'checked' : ''} class="form-radio text-green-500 h-5 w-5">
+                                    <span class="ml-2 text-gray-800 font-bold">🎸 その他</span>
                                 </label>
                             </div>
                         </div>
@@ -578,9 +588,14 @@
                 const isUpcoming = new Date(record.date) >= new Date(new Date().setHours(0, 0, 0, 0));
                 
                 // バッジの表示
-                const badge = record.type === 'event' 
-                    ? `<span class="bg-orange-100 text-orange-800 text-sm font-bold px-2 py-1 rounded-md mr-2">🎪 EVENT</span>`
-                    : `<span class="bg-blue-100 text-blue-800 text-sm font-bold px-2 py-1 rounded-md mr-2">🎤 LIVE</span>`;
+                let badge = '';
+                if (record.type === 'event') {
+                    badge = `<span class="bg-orange-100 text-orange-800 text-sm font-bold px-2 py-1 rounded-md mr-2">🎪 EVENT</span>`;
+                } else if (record.type === 'other') {
+                    badge = `<span class="bg-green-100 text-green-800 text-sm font-bold px-2 py-1 rounded-md mr-2">🎸 OTHER</span>`;
+                } else {
+                    badge = `<span class="bg-blue-100 text-blue-800 text-sm font-bold px-2 py-1 rounded-md mr-2">🎤 LIVE</span>`;
+                }
 
                 modalContent.innerHTML = `
                     <div class="flex items-center mb-2">
@@ -839,9 +854,14 @@
                 const year = dateParts[0];
 
                 // バッジの決定
-                const badge = record.type === 'event' 
-                    ? `<span class="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-0.5 rounded border border-orange-200">🎪 EVENT</span>`
-                    : `<span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded border border-blue-200">🎤 LIVE</span>`;
+                let badge = '';
+                if (record.type === 'event') {
+                    badge = `<span class="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-0.5 rounded border border-orange-200">🎪 EVENT</span>`;
+                } else if (record.type === 'other') {
+                    badge = `<span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-0.5 rounded border border-green-200">🎸 OTHER</span>`;
+                } else {
+                    badge = `<span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded border border-blue-200">🎤 LIVE</span>`;
+                }
 
                 card.innerHTML = `
                     <div class="relative h-40">
