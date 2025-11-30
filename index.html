@@ -33,7 +33,7 @@
             <h1 class="text-2xl font-extrabold tracking-tight">🎶 My Live Records</h1>
             <div class="flex space-x-3">
                 <button id="toggleAddForm" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded-lg shadow-md transition-colors text-sm">
-                    ライブの追加・編集・削除はこちら
+                    予定の追加・編集・削除はこちら
                 </button>
                 <button id="toggleFilter" class="p-2 rounded-lg hover:bg-gray-700 transition-colors md:hidden text-sm">
                     絞り込み
@@ -45,13 +45,13 @@
     <!-- メインコンテンツエリア -->
     <main class="max-w-4xl mx-auto p-4">
 
-        <!-- ライブ追加フォーム (認証後表示) -->
+        <!-- 記録追加フォーム (認証後表示) -->
         <div id="addRecordSection" class="bg-white p-4 rounded-xl shadow-2xl mb-6 hidden border-l-4 border-blue-500">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">ライブ記録追加・編集・削除</h2>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">記録の追加・編集・削除</h2>
 
             <!-- パスワード認証エリア -->
             <div id="authArea">
-                <p class="text-sm text-gray-500 mb-3 font-medium">※ パスワード認証により、ライブ予定の追加・編集が可能です。</p>
+                <p class="text-sm text-gray-500 mb-3 font-medium">※ パスワード認証により、予定の追加・編集が可能です。</p>
                 <div class="flex space-x-2">
                     <input type="password" id="passwordInput" placeholder="パスワードを入力" class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                     <button id="authenticateBtn" class="bg-gray-700 hover:bg-gray-800 text-white font-semibold py-3 px-5 rounded-lg transition-colors">認証</button>
@@ -59,19 +59,34 @@
                 <p id="authMessage" class="mt-2 text-sm text-red-500"></p>
             </div>
 
-            <!-- ライブ追加フォーム (認証成功後) -->
+            <!-- 追加フォーム (認証成功後) -->
             <form id="addRecordForm" class="hidden mt-4">
+                <!-- カテゴリ選択 -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">カテゴリ *</label>
+                    <div class="flex space-x-4">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="newType" value="live" checked class="form-radio text-blue-600 h-5 w-5">
+                            <span class="ml-2 text-gray-800 font-bold">🎤 ライブ</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="newType" value="event" class="form-radio text-orange-500 h-5 w-5">
+                            <span class="ml-2 text-gray-800 font-bold">🎪 イベント</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label for="newDate" class="block text-sm font-medium text-gray-700">日付 *</label>
                         <input type="date" id="newDate" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label for="newLiveName" class="block text-sm font-medium text-gray-700">ライブ名 *</label>
+                        <label for="newLiveName" class="block text-sm font-medium text-gray-700">タイトル (ライブ/イベント名) *</label>
                         <input type="text" id="newLiveName" placeholder="例: Channel U Tour 2025" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label for="newArtist" class="block text-sm font-medium text-gray-700">アーティスト名 *</label>
+                        <label for="newArtist" class="block text-sm font-medium text-gray-700">アーティスト/出演者 *</label>
                         <input type="text" id="newArtist" placeholder="例: 緑黄色社会" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
@@ -82,15 +97,15 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
-                        <label for="newSeatType" class="block text-sm font-medium text-gray-700">席種 (任意)</label>
+                        <label for="newSeatType" class="block text-sm font-medium text-gray-700">座席/整理番号 (任意)</label>
                         <input type="text" id="newSeatType" placeholder="例: 1階 15列 11番" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label for="newTicketImageFile" class="block text-sm font-medium text-gray-700">チケット画像ファイル (任意)</label>
+                        <label for="newTicketImageFile" class="block text-sm font-medium text-gray-700">チケット画像 (任意)</label>
                         <input type="file" id="newTicketImageFile" accept="image/*" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                     </div>
                     <div>
-                        <label for="newImageFile" class="block text-sm font-medium text-gray-700">ライブ画像ファイル (任意)</label>
+                        <label for="newImageFile" class="block text-sm font-medium text-gray-700">画像ファイル (任意)</label>
                         <input type="file" id="newImageFile" accept="image/*" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                     </div>
                 </div>
@@ -101,7 +116,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-md">
-                    ライブ予定を登録
+                    予定を登録
                 </button>
                 <p id="addMessage" class="mt-2 text-sm text-green-600"></p>
             </form>
@@ -109,9 +124,9 @@
 
         <!-- フィルタリング/検索エリア (モバイルでは非表示/トグル) -->
         <div id="filterArea" class="bg-white p-4 rounded-xl shadow-md mb-6 md:block">
-            <h2 class="text-lg font-semibold text-gray-700 mb-3">ライブ記録を検索・絞り込み</h2>
+            <h2 class="text-lg font-semibold text-gray-700 mb-3">記録を検索・絞り込み</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input type="text" id="searchKeyword" placeholder="ライブ名、バンド名、会場、席種、楽曲名で検索" class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                <input type="text" id="searchKeyword" placeholder="タイトル、アーティスト、会場、席種、楽曲名で検索" class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                 <select id="filterVenue" class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                     <option value="">全ての会場</option>
                     <!-- オプションはJSで動的に追加されます -->
@@ -120,21 +135,21 @@
         </div>
 
         <!-- 記録一覧表示エリア - 今後の予定 -->
-        <h2 id="upcomingTitle" class="text-2xl font-bold text-gray-700 mb-4 mt-6 border-b-2 border-blue-500 pb-1">📅 Upcoming Lives (今後の予定)</h2>
+        <h2 id="upcomingTitle" class="text-2xl font-bold text-gray-700 mb-4 mt-6 border-b-2 border-blue-500 pb-1">📅 Upcoming Schedule (今後の予定)</h2>
         <section id="upcomingList" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></section>
 
         <!-- 記録一覧表示エリア - 終了済み -->
-        <h2 id="pastTitle" class="text-2xl font-bold text-gray-700 mb-4 mt-10 border-b-2 border-gray-400 pb-1">🎤 Past Lives (終了済み)</h2>
+        <h2 id="pastTitle" class="text-2xl font-bold text-gray-700 mb-4 mt-10 border-b-2 border-gray-400 pb-1">🎤 Past Schedule (終了済み)</h2>
         <section id="pastList" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></section>
 
         <!-- 結果なしメッセージ -->
         <div id="noResults" class="hidden text-center p-12 bg-white rounded-xl shadow-md mt-6">
-            <p class="text-xl text-gray-500 font-medium">お探しのライブ記録は見つかりませんでした。</p>
+            <p class="text-xl text-gray-500 font-medium">お探しの記録は見つかりませんでした。</p>
             <p class="text-gray-400 mt-2">検索条件を変更して再度お試しください。</p>
         </div>
     </main>
 
-    <!-- ライブ詳細/編集モーダル (オーバーレイ) -->
+    <!-- 詳細/編集モーダル (オーバーレイ) -->
     <div id="detailModal" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 flex items-center justify-center p-4 hidden transition-opacity duration-300" onclick="closeModal(event)">
         <div class="bg-white w-full max-w-2xl max-h-[90vh] rounded-xl shadow-2xl overflow-y-auto transform scale-95 opacity-0 transition-all duration-300" role="dialog" aria-modal="true" aria-labelledby="modalTitle" onclick="event.stopPropagation()">
             <div class="p-6">
@@ -160,7 +175,7 @@
     <div id="deleteConfirmModal" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-[60] flex items-center justify-center p-4 hidden">
         <div class="bg-white w-full max-w-sm rounded-xl p-6 shadow-2xl">
             <h3 class="text-xl font-bold text-red-600 mb-4">🚨 記録の削除確認</h3>
-            <p class="mb-6 text-gray-700">本当にこのライブ記録を削除しますか？一度削除すると元に戻せません。</p>
+            <p class="mb-6 text-gray-700">本当にこの記録を削除しますか？一度削除すると元に戻せません。</p>
             <div class="flex justify-end space-x-3">
                 <button onclick="closeDeleteConfirmModal()" class="px-4 py-2 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition-colors">キャンセル</button>
                 <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors">削除する</button>
@@ -211,30 +226,31 @@
         // --- ライブ記録データと基本ロジック ---
 
         // ライブ記録の初期データ (ID: 1-23)
+        // type: 'live' or 'event' を追加
         const initialRecords = [
-            { id: 1, date: "2022-05-01", liveName: "Actor Tour 2022", artist: "緑黄色社会", venue: "福岡サンパレス", image: "", ticketImage: "", seatType: "1階 10列 1番", setlist: ["Actor", "LITMUS", "Mela!", "Shout Baby", "S.T.A.R."] },
-            { id: 2, date: "2022-11-27", liveName: "LIVE TOUR 2022 Labo.", artist: "Snow man", venue: "マリンメッセ福岡", image: "", ticketImage: "", seatType: "アリーナ Aブロック 10番", setlist: ["D.D.", "ブラザービート", "オレンジkiss", "JUICY", "Secret Touch"] },
-            { id: 3, date: "2023-06-10", liveName: "pink blue tour 2023", artist: "緑黄色社会", venue: "福岡サンパレス", image: "", ticketImage: "", seatType: "2階 1列 20番", setlist: ["サマータイムシンデレラ", "始まりの歌", "Sabotage", "一歩", "花になって"] },
-            { id: 4, date: "2024-03-09", liveName: "LIVE TOUR VVS", artist: "SixTONES", venue: "福岡paypayドーム", image: "", ticketImage: "", seatType: "スタンド 5塁側 10通路", setlist: ["こっから", "NAVIGATOR", "Imitation Rain", "NEW ERA", "Good Luck!"] },
-            { id: 5, date: "2024-03-30", liveName: "Arena Tour 2024 Gates+", artist: "美少年", venue: "横浜アリーナ", image: "", ticketImage: "", seatType: "センター席 10ブロック 1番", setlist: ["未来が始まる", "Cosmic Melody", "Beautiful Love", "LALA LOVE", "虹の中で"] },
-            { id: 6, date: "2024-06-16", liveName: "緑黄色社会大夜祭", artist: "緑黄色社会", venue: "横浜アリーナ", image: "", ticketImage: "", seatType: "アリーナ席 5列 5番", setlist: ["恋をしよう", "Re", "Party!!", "にちようび", "あの頃の歌"] },
-            { id: 7, date: "2024-11-10", liveName: "YOASOBI DOME LIVE 2024", artist: "YOASOBI", venue: "東京ドーム", image: "", ticketImage: "", seatType: "バルコニー席 1列 1番", setlist: ["アイドル", "夜に駆ける", "群青", "祝福", "勇者"] },
-            { id: 8, date: "2024-11-23", liveName: "LIVE HOUSE TOUR Laugh", artist: "緑黄色社会", venue: "Zepp Haneda", image: "", ticketImage: "", seatType: "", setlist: [] },
-            { id: 9, date: "2024-12-15", liveName: "Snow Man Dome Tour 2024 RAVS", artist: "Snow Man", venue: "東京ドーム", image: "", ticketImage: "", seatType: "アリーナ", setlist: [] },
-            { id: 10, date: "2025-04-04", liveName: "CENTRAL STAGE", artist: "緑黄色社会/乃木坂46", venue: "Kアリーナ横浜", image: "", ticketImage: "", seatType: "アリーナ", setlist: [] },
-            { id: 11, date: "2025-04-06", liveName: "Echoes Baa", artist: "YOASOBI/FRUITS ZIPPER etc", venue: "横浜赤レンガ倉庫", image: "", ticketImage: "", seatType: "", setlist: [] },
-            { id: 12, date: "2025-05-02", liveName: "Channel U Tour 2025", artist: "FRUITS ZIPPER", venue: "水戸市民会館", image: "", ticketImage: "", seatType: "1階 15列 11番", setlist: [] },
-            { id: 13, date: "2025-07-05", liveName: "Channel Me", artist: "緑黄色社会", venue: "東京体育館", image: "", ticketImage: "", seatType: "", setlist: [] },
-            { id: 14, date: "2025-07-20", liveName: "ASOBI EXPO", artist: "きゃりーぱみゅぱみゅ/新しい学校のリーダーズ/FRUITS ZIPPER/CUTIE STREET/Kizuna AI/Touka/Rung Ruler", venue: "幕張メッセ国際展示場 9・10・11ホール", image: "", ticketImage: "", seatType: "", setlist: [] },
-            { id: 15, date: "2025-08-02", liveName: "FRUITS ZIPPER 3rd ANNIVERSARY", artist: "FRUITS ZIPPER", venue: "さいたまスーパーアリーナ", image: "", ticketImage: "", seatType: "200レベル 2列 333番", setlist: [] },
-            { id: 16, date: "2025-08-30", liveName: "超ときめき♡宣伝部のきみのハートにロックオンTOUR 2025 10th Anniversary", artist: "超ときめき♡宣伝部", venue: "パシフィコ横浜国立大ホール", image: "", ticketImage: "", seatType: "2階通路線側", setlist: [] },
-            { id: 17, date: "2025-09-19", liveName: "音楽の日フェス", artist: "FRUITS ZIPPER/CANDY TUNE/SWEET STEADY", venue: "東京ガーデンシアター", image: "", ticketImage: "", seatType: "アリーナ 3列 10番", setlist: [] },
-            { id: 18, date: "2025-10-04", liveName: "はちゃめちゃわちゃわちゃライブ", artist: "FRUITS ZIPPER", venue: "豊洲PIT 8ホール", image: "", ticketImage: "", seatType: "C1ブロック列2番（端）", setlist: [] },
-            { id: 19, date: "2025-10-07", liveName: "COSMIC CIRCUS", artist: "緑黄色社会/Aqua Timez", venue: "Zepp羽田", image: "", ticketImage: "", seatType: "", setlist: [] },
-            { id: 20, date: "2025-10-13", liveName: "CUTIE STREET 1st ANNIVERSARY JAPAN TOUR 2025「CAN'T STOP CUTIE.」", artist: "CUTIE STREET", venue: "ぴあアリーナMM", image: "", ticketImage: "https://placehold.co/100x100/e5e7eb/737373?text=Ticket", seatType: "アリーナCブロック 4列 6番", setlist: [] },
-            { id: 21, date: "2025-11-17", liveName: "SWEET STEADY JAPAN TOUR 2025 - AUTUMN -Collection", artist: "SWEET STEADY", venue: "Zepp DiverCity", image: "", ticketImage: "https://placehold.co/100x100/e5e7eb/737373?text=Ticket", seatType: "", setlist: [] },
-            { id: 22, date: "2025-12-13", liveName: "KAWAII.LAB SESSION", artist: "FRUITS ZIPPER/CANDY TUNE/SWEET STEADY/CUTIE STREET", venue: "Kアリーナ横浜", image: "", ticketImage: "", seatType: "", setlist: [] },
-            { id: 23, date: "2026-02-04", liveName: "FRUITS ZIPPER SPECIAL LIVE 2026", artist: "FRUITS ZIPPER", venue: "東京ドーム", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 1, type: "live", date: "2022-05-01", liveName: "Actor Tour 2022", artist: "緑黄色社会", venue: "福岡サンパレス", image: "", ticketImage: "", seatType: "1階 10列 1番", setlist: ["Actor", "LITMUS", "Mela!", "Shout Baby", "S.T.A.R."] },
+            { id: 2, type: "live", date: "2022-11-27", liveName: "LIVE TOUR 2022 Labo.", artist: "Snow man", venue: "マリンメッセ福岡", image: "", ticketImage: "", seatType: "アリーナ Aブロック 10番", setlist: ["D.D.", "ブラザービート", "オレンジkiss", "JUICY", "Secret Touch"] },
+            { id: 3, type: "live", date: "2023-06-10", liveName: "pink blue tour 2023", artist: "緑黄色社会", venue: "福岡サンパレス", image: "", ticketImage: "", seatType: "2階 1列 20番", setlist: ["サマータイムシンデレラ", "始まりの歌", "Sabotage", "一歩", "花になって"] },
+            { id: 4, type: "live", date: "2024-03-09", liveName: "LIVE TOUR VVS", artist: "SixTONES", venue: "福岡paypayドーム", image: "", ticketImage: "", seatType: "スタンド 5塁側 10通路", setlist: ["こっから", "NAVIGATOR", "Imitation Rain", "NEW ERA", "Good Luck!"] },
+            { id: 5, type: "live", date: "2024-03-30", liveName: "Arena Tour 2024 Gates+", artist: "美少年", venue: "横浜アリーナ", image: "", ticketImage: "", seatType: "センター席 10ブロック 1番", setlist: ["未来が始まる", "Cosmic Melody", "Beautiful Love", "LALA LOVE", "虹の中で"] },
+            { id: 6, type: "live", date: "2024-06-16", liveName: "緑黄色社会大夜祭", artist: "緑黄色社会", venue: "横浜アリーナ", image: "", ticketImage: "", seatType: "アリーナ席 5列 5番", setlist: ["恋をしよう", "Re", "Party!!", "にちようび", "あの頃の歌"] },
+            { id: 7, type: "live", date: "2024-11-10", liveName: "YOASOBI DOME LIVE 2024", artist: "YOASOBI", venue: "東京ドーム", image: "", ticketImage: "", seatType: "バルコニー席 1列 1番", setlist: ["アイドル", "夜に駆ける", "群青", "祝福", "勇者"] },
+            { id: 8, type: "live", date: "2024-11-23", liveName: "LIVE HOUSE TOUR Laugh", artist: "緑黄色社会", venue: "Zepp Haneda", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 9, type: "live", date: "2024-12-15", liveName: "Snow Man Dome Tour 2024 RAVS", artist: "Snow Man", venue: "東京ドーム", image: "", ticketImage: "", seatType: "アリーナ", setlist: [] },
+            { id: 10, type: "live", date: "2025-04-04", liveName: "CENTRAL STAGE", artist: "緑黄色社会/乃木坂46", venue: "Kアリーナ横浜", image: "", ticketImage: "", seatType: "アリーナ", setlist: [] },
+            { id: 11, type: "event", date: "2025-04-06", liveName: "Echoes Baa", artist: "YOASOBI/FRUITS ZIPPER etc", venue: "横浜赤レンガ倉庫", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 12, type: "live", date: "2025-05-02", liveName: "Channel U Tour 2025", artist: "FRUITS ZIPPER", venue: "水戸市民会館", image: "", ticketImage: "", seatType: "1階 15列 11番", setlist: [] },
+            { id: 13, type: "live", date: "2025-07-05", liveName: "Channel Me", artist: "緑黄色社会", venue: "東京体育館", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 14, type: "event", date: "2025-07-20", liveName: "ASOBI EXPO", artist: "きゃりーぱみゅぱみゅ/新しい学校のリーダーズ/FRUITS ZIPPER etc", venue: "幕張メッセ国際展示場", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 15, type: "live", date: "2025-08-02", liveName: "FRUITS ZIPPER 3rd ANNIVERSARY", artist: "FRUITS ZIPPER", venue: "さいたまスーパーアリーナ", image: "", ticketImage: "", seatType: "200レベル 2列 333番", setlist: [] },
+            { id: 16, type: "live", date: "2025-08-30", liveName: "超ときめき♡宣伝部のきみのハートにロックオンTOUR 2025", artist: "超ときめき♡宣伝部", venue: "パシフィコ横浜国立大ホール", image: "", ticketImage: "", seatType: "2階通路線側", setlist: [] },
+            { id: 17, type: "event", date: "2025-09-19", liveName: "音楽の日フェス", artist: "FRUITS ZIPPER/CANDY TUNE/SWEET STEADY", venue: "東京ガーデンシアター", image: "", ticketImage: "", seatType: "アリーナ 3列 10番", setlist: [] },
+            { id: 18, type: "live", date: "2025-10-04", liveName: "はちゃめちゃわちゃわちゃライブ", artist: "FRUITS ZIPPER", venue: "豊洲PIT 8ホール", image: "", ticketImage: "", seatType: "C1ブロック列2番（端）", setlist: [] },
+            { id: 19, type: "live", date: "2025-10-07", liveName: "COSMIC CIRCUS", artist: "緑黄色社会/Aqua Timez", venue: "Zepp羽田", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 20, type: "live", date: "2025-10-13", liveName: "CUTIE STREET 1st ANNIVERSARY", artist: "CUTIE STREET", venue: "ぴあアリーナMM", image: "", ticketImage: "https://placehold.co/100x100/e5e7eb/737373?text=Ticket", seatType: "アリーナCブロック 4列 6番", setlist: [] },
+            { id: 21, type: "live", date: "2025-11-17", liveName: "SWEET STEADY JAPAN TOUR 2025", artist: "SWEET STEADY", venue: "Zepp DiverCity", image: "", ticketImage: "https://placehold.co/100x100/e5e7eb/737373?text=Ticket", seatType: "", setlist: [] },
+            { id: 22, type: "event", date: "2025-12-13", liveName: "KAWAII.LAB SESSION", artist: "FRUITS ZIPPER/CANDY TUNE/SWEET STEADY/CUTIE STREET", venue: "Kアリーナ横浜", image: "", ticketImage: "", seatType: "", setlist: [] },
+            { id: 23, type: "live", date: "2026-02-04", liveName: "FRUITS ZIPPER SPECIAL LIVE 2026", artist: "FRUITS ZIPPER", venue: "東京ドーム", image: "", ticketImage: "", seatType: "", setlist: [] },
         ];
 
         // localStorageからライブ記録をロード
@@ -245,12 +261,14 @@
                 records = initialRecords.map(record => ({...record}));
             }
 
-            // 互換性のため、既存のstring配列を新しい形式に変換する
+            // 互換性のため、既存データ構造を正規化
             records.forEach(r => {
+                // typeがなければ 'live' をデフォルトにする
+                if (!r.type) r.type = 'live';
+
                 if (!Array.isArray(r.setlist)) r.setlist = [];
                 r.setlist = r.setlist.map(item => {
                     if (typeof item === 'string') return { type: 'song', title: item };
-                    // 既に新形式ならそのまま
                     return item;
                 });
             });
@@ -350,16 +368,16 @@
 
             return `
                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">セットリスト</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">セットリスト / イベント内容メモ</label>
                     <div id="${containerId}">
                         ${itemsHtml}
                     </div>
                     
                     <!-- 曲追加エリア -->
                     <div class="flex mt-3 space-x-2 border-b pb-3 border-gray-200">
-                        <input type="text" id="${inputId}" placeholder="曲名を入力" class="flex-grow p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addSetlistItem('${mode}');}">
+                        <input type="text" id="${inputId}" placeholder="曲名やメモを入力" class="flex-grow p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addSetlistItem('${mode}');}">
                         <button type="button" onclick="addSetlistItem('${mode}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium transition-colors whitespace-nowrap">
-                            曲追加
+                            追加
                         </button>
                     </div>
 
@@ -372,11 +390,12 @@
                             <button type="button" onclick="addSection('${mode}', '衣装替え')" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm">衣装替え</button>
                             <button type="button" onclick="addSection('${mode}', 'アンコール')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm">アンコール</button>
                             <button type="button" onclick="addSection('${mode}', 'メドレー')" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-sm">メドレー</button>
+                            <button type="button" onclick="addSection('${mode}', 'トークコーナー')" class="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded text-sm">トーク</button>
                         </div>
 
                         <!-- 自由入力セクション -->
                         <div class="flex space-x-2">
-                            <input type="text" id="${customSectionInputId}" placeholder="自由な区切り名 (例: 第2部, ゲスト登場)" class="flex-grow p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addCustomSection('${mode}');}">
+                            <input type="text" id="${customSectionInputId}" placeholder="自由な区切り名 (例: 第2部, 抽選会)" class="flex-grow p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addCustomSection('${mode}');}">
                             <button type="button" onclick="addCustomSection('${mode}')" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm whitespace-nowrap">
                                 追加
                             </button>
@@ -481,22 +500,39 @@
 
         // 詳細表示コンテンツをレンダリングする関数
         const renderDetailContent = (record, isEditMode = false) => {
+            const typeLabel = record.type === 'event' ? 'イベント' : 'ライブ';
+            
             if (isEditMode) {
                 // 編集モードのフォームをレンダリング
                 modalContent.innerHTML = `
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">ライブ記録の編集</h2>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">${typeLabel}記録の編集</h2>
                     <form id="editForm" onsubmit="event.preventDefault(); saveEditedRecord(${record.id});">
+                        <!-- カテゴリ編集 -->
+                        <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">カテゴリ</label>
+                            <div class="flex space-x-4">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="editType" value="live" ${record.type === 'live' ? 'checked' : ''} class="form-radio text-blue-600 h-5 w-5">
+                                    <span class="ml-2 text-gray-800 font-bold">🎤 ライブ</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="editType" value="event" ${record.type === 'event' ? 'checked' : ''} class="form-radio text-orange-500 h-5 w-5">
+                                    <span class="ml-2 text-gray-800 font-bold">🎪 イベント</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label for="editDate" class="block text-sm font-medium text-gray-700">日付 *</label>
                                 <input type="date" id="editDate" value="${record.date}" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
-                                <label for="editLiveName" class="block text-sm font-medium text-gray-700">ライブ名 *</label>
+                                <label for="editLiveName" class="block text-sm font-medium text-gray-700">タイトル *</label>
                                 <input type="text" id="editLiveName" value="${record.liveName}" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
-                                <label for="editArtist" class="block text-sm font-medium text-gray-700">アーティスト名 *</label>
+                                <label for="editArtist" class="block text-sm font-medium text-gray-700">アーティスト/出演者 *</label>
                                 <input type="text" id="editArtist" value="${record.artist}" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
@@ -506,7 +542,7 @@
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
-                                <label for="editSeatType" class="block text-sm font-medium text-gray-700">席種 (任意)</label>
+                                <label for="editSeatType" class="block text-sm font-medium text-gray-700">座席/整理番号 (任意)</label>
                                 <input type="text" id="editSeatType" value="${record.seatType || ''}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div>
@@ -515,7 +551,7 @@
                                 ${record.ticketImage ? '<p class="text-xs text-gray-500 mt-1">※ 現在画像が設定されています</p>' : ''}
                             </div>
                             <div>
-                                <label for="editImageFile" class="block text-sm font-medium text-gray-700">ライブ画像 (変更する場合)</label>
+                                <label for="editImageFile" class="block text-sm font-medium text-gray-700">画像 (変更する場合)</label>
                                 <input type="file" id="editImageFile" accept="image/*" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                                 ${record.image ? '<p class="text-xs text-gray-500 mt-1">※ 現在画像が設定されています</p>' : ''}
                             </div>
@@ -540,9 +576,17 @@
             } else {
                 // 詳細表示をレンダリング
                 const isUpcoming = new Date(record.date) >= new Date(new Date().setHours(0, 0, 0, 0));
+                
+                // バッジの表示
+                const badge = record.type === 'event' 
+                    ? `<span class="bg-orange-100 text-orange-800 text-sm font-bold px-2 py-1 rounded-md mr-2">🎪 EVENT</span>`
+                    : `<span class="bg-blue-100 text-blue-800 text-sm font-bold px-2 py-1 rounded-md mr-2">🎤 LIVE</span>`;
 
                 modalContent.innerHTML = `
-                    <h2 class="text-3xl font-extrabold text-gray-900 mb-2">${record.liveName}</h2>
+                    <div class="flex items-center mb-2">
+                        ${badge}
+                        <h2 class="text-3xl font-extrabold text-gray-900">${record.liveName}</h2>
+                    </div>
                     <p class="text-xl text-blue-600 mb-4">${record.artist}</p>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -552,13 +596,13 @@
                             <p class="text-md text-gray-600">${record.venue}</p>
                         </div>
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <h3 class="font-semibold text-gray-700 mb-1">🎫 席種</h3>
+                            <h3 class="font-semibold text-gray-700 mb-1">🎫 座席/整理番号</h3>
                             <p class="text-lg">${record.seatType || '情報なし'}</p>
                         </div>
                     </div>
 
                     ${record.image ? `
-                        <h3 class="font-semibold text-gray-700 mb-2">📸 ライブ画像</h3>
+                        <h3 class="font-semibold text-gray-700 mb-2">📸 メイン画像</h3>
                         <img src="${record.image}" alt="ライブ画像" class="w-full h-auto rounded-xl shadow-lg mb-6 object-cover max-h-80">
                     ` : ''}
 
@@ -568,7 +612,7 @@
                     ` : ''}
 
                     ${!isUpcoming && record.setlist && record.setlist.length > 0 ? `
-                        <h3 class="font-semibold text-gray-700 mb-2 mt-4 border-b pb-1">🎵 セットリスト</h3>
+                        <h3 class="font-semibold text-gray-700 mb-2 mt-4 border-b pb-1">🎵 セットリスト / メモ</h3>
                         <ul class="list-none space-y-1">
                             ${record.setlist.map((item, idx) => {
                                 if (item.type === 'section') {
@@ -622,6 +666,16 @@
             const recordIndex = liveRecords.findIndex(r => r.id === id);
             if (recordIndex === -1 || !isAuthSuccessful) return;
 
+            // タイプ(Radio)の取得
+            const editTypeElements = document.getElementsByName('editType');
+            let editType = 'live';
+            for (const rb of editTypeElements) {
+                if (rb.checked) {
+                    editType = rb.value;
+                    break;
+                }
+            }
+
             const editDate = document.getElementById('editDate').value;
             const editLiveName = document.getElementById('editLiveName').value;
             const editArtist = document.getElementById('editArtist').value;
@@ -643,7 +697,7 @@
             const editMessage = document.getElementById('editMessage');
 
             if (!editDate || !editLiveName || !editArtist || !editVenue) {
-                editMessage.textContent = '日付、ライブ名、アーティスト名、会場名は必須です。';
+                editMessage.textContent = '日付、タイトル、アーティスト名、会場名は必須です。';
                 editMessage.className = "mt-2 text-sm text-red-600 font-bold";
                 return;
             }
@@ -655,6 +709,7 @@
             // レコードを更新
             liveRecords[recordIndex] = {
                 ...liveRecords[recordIndex],
+                type: editType,
                 date: editDate,
                 liveName: editLiveName,
                 artist: editArtist,
@@ -783,20 +838,25 @@
                 const monthDay = `${dateParts[1]}/${dateParts[2]}`;
                 const year = dateParts[0];
 
+                // バッジの決定
+                const badge = record.type === 'event' 
+                    ? `<span class="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-0.5 rounded border border-orange-200">🎪 EVENT</span>`
+                    : `<span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded border border-blue-200">🎤 LIVE</span>`;
+
                 card.innerHTML = `
                     <div class="relative h-40">
                         <img src="${record.image || record.ticketImage || `https://placehold.co/600x400/e5e7eb/737373?text=${encodeURIComponent(record.artist)}`}" 
-                             alt="ライブ画像" 
+                             alt="画像" 
                              class="w-full h-full object-cover"
                              onerror="this.onerror=null; this.src='https://placehold.co/600x400/e5e7eb/737373?text=${encodeURIComponent(record.artist)}'">
                         <div class="absolute inset-0 bg-gradient-to-t from-gray-900/70 to-transparent"></div>
-                        <div class="absolute top-0 right-0 m-2 bg-white/90 text-gray-800 text-sm font-bold py-1 px-3 rounded-full shadow-md">
-                            ${isUpcoming ? '予定' : '終了'}
+                        <div class="absolute top-0 right-0 m-2 flex space-x-2">
+                             ${badge}
                         </div>
                     </div>
                     <div class="p-4">
                         <p class="text-xs text-gray-500">${year}</p>
-                        <p class="text-2xl font-extrabold text-blue-600 mb-1">${monthDay}</p>
+                        <p class="text-2xl font-extrabold text-gray-800 mb-1">${monthDay}</p>
                         <h3 class="text-xl font-bold text-gray-900 truncate">${record.liveName}</h3>
                         <p class="text-sm text-gray-600 truncate">${record.artist} @ ${record.venue}</p>
                     </div>
@@ -828,7 +888,7 @@
                 const inputHash = await sha256(password);
                 if (inputHash === CORRECT_PASSWORD_HASH) {
                     isAuthSuccessful = true;
-                    authMessage.textContent = '認証成功！ライブの追加・編集が可能になりました。';
+                    authMessage.textContent = '認証成功！予定の追加・編集が可能になりました。';
                     authMessage.className = "mt-2 text-sm text-green-600 font-bold";
                     authArea.classList.add('hidden');
                     addRecordForm.classList.remove('hidden');
@@ -864,11 +924,21 @@
             }
         });
 
-        // --- ライブ追加フォームのイベントリスナー ---
+        // --- 追加フォームのイベントリスナー ---
         addRecordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             if (!isAuthSuccessful) return;
+
+            // タイプ(Radio)の取得
+            const newTypeElements = document.getElementsByName('newType');
+            let newType = 'live';
+            for (const rb of newTypeElements) {
+                if (rb.checked) {
+                    newType = rb.value;
+                    break;
+                }
+            }
 
             // フォームデータの取得
             const newDate = document.getElementById('newDate').value;
@@ -891,7 +961,7 @@
             const newImageFile = document.getElementById('newImageFile').files[0];
 
             if (!newDate || !newLiveName || !newArtist || !newVenue) {
-                addMessage.textContent = '日付、ライブ名、アーティスト名、会場名は必須です。';
+                addMessage.textContent = '日付、タイトル、アーティスト名、会場名は必須です。';
                 addMessage.className = "mt-2 text-sm text-red-600 font-bold";
                 return;
             }
@@ -901,6 +971,7 @@
 
             const newRecord = {
                 id: Date.now(),
+                type: newType,
                 date: newDate,
                 liveName: newLiveName,
                 artist: newArtist,
@@ -932,7 +1003,7 @@
         filterVenue.addEventListener('change', filterRecords);
         confirmDeleteBtn.addEventListener('click', deleteRecord);
 
-        // ライブ追加フォームの表示/非表示切り替え
+        // 追加フォームの表示/非表示切り替え
         toggleAddFormBtn.addEventListener('click', () => {
             addRecordSection.classList.toggle('hidden');
             // 非表示にする際はメッセージをクリア
