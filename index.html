@@ -321,6 +321,7 @@
         const renderSetlistEditor = (setlist, mode) => {
             const containerId = `${mode}SetlistEditorContainer`;
             const inputId = `${mode}NewSongInput`;
+            const customSectionInputId = `${mode}NewSectionInput`;
 
             // setlistは配列の要素が {type:'song'|'section', title: '...'} の形式
             const itemsHtml = setlist.map((item, index) => {
@@ -353,17 +354,33 @@
                     <div id="${containerId}">
                         ${itemsHtml}
                     </div>
-                    <div class="flex mt-3 space-x-2">
+                    
+                    <!-- 曲追加エリア -->
+                    <div class="flex mt-3 space-x-2 border-b pb-3 border-gray-200">
                         <input type="text" id="${inputId}" placeholder="曲名を入力" class="flex-grow p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addSetlistItem('${mode}');}">
-                        <button type="button" onclick="addSetlistItem('${mode}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium transition-colors">
+                        <button type="button" onclick="addSetlistItem('${mode}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium transition-colors whitespace-nowrap">
                             曲追加
                         </button>
                     </div>
 
-                    <div class="flex mt-3 space-x-2">
-                        <button type="button" onclick="addSection('${mode}', '衣装替え')" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded">衣装替え追加</button>
-                        <button type="button" onclick="addSection('${mode}', 'アンコール')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">アンコール追加</button>
-                        <button type="button" onclick="addSection('${mode}', 'メドレー')" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded">メドレー追加</button>
+                    <!-- セクション追加エリア -->
+                    <div class="mt-3">
+                        <p class="text-xs text-gray-500 mb-2 font-bold">区切り（セクション）を追加:</p>
+                        
+                        <!-- 定型ボタン -->
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <button type="button" onclick="addSection('${mode}', '衣装替え')" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm">衣装替え</button>
+                            <button type="button" onclick="addSection('${mode}', 'アンコール')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm">アンコール</button>
+                            <button type="button" onclick="addSection('${mode}', 'メドレー')" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-sm">メドレー</button>
+                        </div>
+
+                        <!-- 自由入力セクション -->
+                        <div class="flex space-x-2">
+                            <input type="text" id="${customSectionInputId}" placeholder="自由な区切り名 (例: 第2部, ゲスト登場)" class="flex-grow p-2 border border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addCustomSection('${mode}');}">
+                            <button type="button" onclick="addCustomSection('${mode}')" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm whitespace-nowrap">
+                                追加
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -422,6 +439,17 @@
 
             container.appendChild(div);
             renumberSetlist(containerId);
+        };
+
+        // 自由入力セクションを追加する
+        window.addCustomSection = (mode) => {
+            const inputId = `${mode}NewSectionInput`;
+            const input = document.getElementById(inputId);
+            const title = input.value.trim();
+            if (!title) return;
+
+            addSection(mode, title);
+            input.value = '';
         };
 
         // セットリストから項目を削除する関数 (Global Scope)
@@ -945,4 +973,3 @@
 
 </body>
 </html>
-
