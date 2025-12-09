@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <!-- キャッシュ無効化メタタグ（更新が反映されない問題を防ぐ） -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ライブ記録</title>
@@ -139,12 +143,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
 
 <script>
-// HTML ファイルを開いたら最新バージョンを取得する
-if ('caches' in window) {
-　caches.keys().then(function(names) {
-  for (let name of names) caches.delete(name);
-   });
-}
 // --- Firebase 設定（提供いただいた値） ---
 const firebaseConfig = {
   apiKey: "AIzaSyBDA4-gNmZzTdUkGQdDhesr2-yP9cfdHMw",
@@ -529,6 +527,7 @@ window.onload = async ()=>{
 </script>
 </body>
 </html>
+
 
 
 
