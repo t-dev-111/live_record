@@ -139,6 +139,12 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
 
 <script>
+// HTML ファイルを開いたら最新バージョンを取得する
+if ('caches' in window) {
+　caches.keys().then(function(names) {
+  for (let name of names) caches.delete(name);
+   });
+}
 // --- Firebase 設定（提供いただいた値） ---
 const firebaseConfig = {
   apiKey: "AIzaSyBDA4-gNmZzTdUkGQdDhesr2-yP9cfdHMw",
@@ -523,6 +529,7 @@ window.onload = async ()=>{
 </script>
 </body>
 </html>
+
 
 
 
