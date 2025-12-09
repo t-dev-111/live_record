@@ -476,7 +476,7 @@ const filterRecords = ()=>{
         card.onclick = ()=> openModal(record.id);
         const dateParts = record.date.split('-'); const monthDay = `${dateParts[1]}/${dateParts[2]}`; const year = dateParts[0];
         let badge = record.type==='event'? `<span class="bg-orange-100 text-orange-800 text-xs font-bold px-2 py-0.5 rounded border border-orange-200">🎪 EVENT</span>` : record.type==='other'? `<span class="bg-green-100 text-green-800 text-xs font-bold px-2 py-0.5 rounded border border-green-200">🎸 OTHER</span>` : `<span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded border border-blue-200">🎤 LIVE</span>`;
-        card.innerHTML = `\n<div class="relative h-40">\n<img src="${record.image||record.ticketImage|| `https://placehold.co/600x400/e5e7eb/737373?text=${encodeURIComponent(record.artist||'LIVE')}`}" alt="画像" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e5e7eb/737373?text=${encodeURIComponent(record.artist||'LIVE')}'">\n<div class="absolute inset-0 bg-gradient-to-t from-gray-900/70 to-transparent"></div>\n<div class="absolute top-0 right-0 m-2 flex space-x-2">${badge}</div>\n</div>\n<div class="p-4">\n<p class="text-xs text-gray-500">${year}</p>\n<p class="text-2xl font-extrabold text-gray-800 mb-1">${monthDay}</p>\n<h3 class="text-xl font-bold text-gray-900 truncate">${record.liveName}</h3>\n<p class="text-sm text-gray-600 truncate">${record.artist} @ ${record.venue}</p>\n</div>`;
+        card.innerHTML = `<div class="p-4"><p class="text-xs text-gray-500">${year}</p><p class="text-2xl font-extrabold text-gray-800 mb-1">${monthDay}</p><h3 class="text-xl font-bold text-gray-900 truncate">${record.liveName}</h3><p class="text-sm text-gray-600 truncate">${record.artist} @ ${record.venue}</p></div>`;
         list.appendChild(card);
     });
 
@@ -544,6 +544,7 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
