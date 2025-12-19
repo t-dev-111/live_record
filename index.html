@@ -179,9 +179,10 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
 
 <script>
-// --- Firebase Config (ユーザー提供値) ---
+// --- Firebase Config ---
 const firebaseConfig = {
   apiKey: "AIzaSyBDA4-gNmZzTdUkGQdDhesr2-yP9cfdHMw",
   authDomain: "livememo-219c5.firebaseapp.com",
@@ -199,6 +200,8 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 const storage = firebase.storage();
 const auth = firebase.auth();
+// ★アナリティクスの初期化（自動的にページビュー計測が開始されます）
+const analytics = firebase.analytics();
 
 // グローバル変数
 let liveRecords = [];
@@ -242,25 +245,19 @@ const initialRecords = [
 auth.onAuthStateChanged(user => {
     isUserLoggedIn = !!user;
     updateAuthUI(user);
-    // ログイン状態が変わったらリストを再描画（詳細モーダルのボタン制御等のため）
     filterRecords(); 
 });
 
-// UI切り替えロジック
 function updateAuthUI(user) {
     if (user) {
-        // ログイン中
         dom.logoutBtn.classList.remove('hidden');
         dom.loginContainer.classList.add('hidden');
         dom.authContent.classList.remove('hidden');
         dom.toggleAddBtn.textContent = "管理者メニュー ▼";
-        
-        // セットリストエディタ初期化
         if (dom.addSetlistArea.innerHTML === "") {
             dom.addSetlistArea.innerHTML = renderSetlistEditor([], 'add');
         }
     } else {
-        // 未ログイン
         dom.logoutBtn.classList.add('hidden');
         dom.loginContainer.classList.remove('hidden');
         dom.authContent.classList.add('hidden');
@@ -268,7 +265,6 @@ function updateAuthUI(user) {
     }
 }
 
-// ログイン処理
 window.handleLogin = (e) => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value;
@@ -277,6 +273,8 @@ window.handleLogin = (e) => {
     
     auth.signInWithEmailAndPassword(email, pass)
         .then(() => {
+            // ★ログイン成功イベント
+            analytics.logEvent('login', { method: 'email' });
             dom.loginMsg.textContent = "";
             document.getElementById('loginPassword').value = "";
         })
@@ -286,16 +284,14 @@ window.handleLogin = (e) => {
         });
 };
 
-// ログアウト処理
 dom.logoutBtn.addEventListener('click', () => {
     if(confirm("ログアウトしますか？")){
         auth.signOut().then(() => {
-            dom.addSection.classList.add('hidden'); // メニューを閉じる
+            dom.addSection.classList.add('hidden');
         });
     }
 });
 
-// --- Firestore リアルタイムリスナー ---
 function startRealtimeListener() {
     if (unsubscribe) unsubscribe();
     unsubscribe = db.collection('liveRecords').orderBy('date').onSnapshot(snapshot => {
@@ -305,20 +301,6 @@ function startRealtimeListener() {
     }, err => console.error('Snapshot error:', err));
 }
 
-// --- 初期シード (管理者ログイン時のみ実行推奨だが、ルールで弾かれるので安全) ---
-async function seedIfEmpty() {
-    const snapshot = await db.collection('liveRecords').limit(1).get();
-    if (snapshot.empty && isUserLoggedIn) {
-        const batch = db.batch();
-        initialRecords.forEach(rec => {
-            const ref = db.collection('liveRecords').doc(rec.id);
-            batch.set(ref, rec);
-        });
-        await batch.commit().catch(e => console.log("Auto-seed failed (permission denied likely):", e));
-    }
-}
-
-// --- 画像アップロード ---
 async function uploadImageFile(file) {
     if (!file) return '';
     try {
@@ -333,7 +315,6 @@ async function uploadImageFile(file) {
     }
 }
 
-// --- セットリスト・エディタ (HTML生成) ---
 const renderSetlistEditor = (setlist, mode) => {
     const containerId = `${mode}SetlistEditorContainer`;
     const inputId = `${mode}NewSongInput`;
@@ -385,7 +366,6 @@ const renderSetlistEditor = (setlist, mode) => {
     </div>`;
 };
 
-// セットリスト操作関数群 (Global)
 window.addSetlistItem = (mode) => {
     const input = document.getElementById(`${mode}NewSongInput`);
     const val = input.value.trim();
@@ -407,9 +387,7 @@ function appendItemHTML(mode, title, type) {
     const container = document.getElementById(containerId);
     const div = document.createElement('div');
     div.className = 'flex items-center space-x-2 mb-2 setlist-item group';
-    
     const styleClass = type === 'section' ? 'font-bold text-blue-600 bg-blue-50' : 'text-gray-700';
-    
     div.innerHTML = `
         <span class="text-gray-400 font-bold w-6 text-right text-xs">-</span>
         <input type="text" value="${title}" class="flex-grow p-2 border border-gray-300 rounded text-sm ${styleClass} setlist-song-input">
@@ -448,7 +426,6 @@ const getSetlistData = (mode) => {
     }).filter(i => i.title);
 };
 
-// --- レコード追加 ---
 dom.addForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!isUserLoggedIn) { alert("ログインしてください"); return; }
@@ -459,7 +436,7 @@ dom.addForm.addEventListener('submit', async (e) => {
     const newArtist = document.getElementById('newArtist').value.trim();
     const newVenue = document.getElementById('newVenue').value.trim();
     
-    if(!newDate || !newLiveName || !newArtist || !newVenue) return; // HTML5 required属性で基本弾く
+    if(!newDate || !newLiveName || !newArtist || !newVenue) return;
     
     dom.addMsg.textContent = "送信中...";
     dom.addMsg.className = "mt-3 text-center text-sm font-bold text-blue-600";
@@ -482,6 +459,13 @@ dom.addForm.addEventListener('submit', async (e) => {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
+        // ★記録追加イベントの送信
+        analytics.logEvent('add_live_record', {
+            artist: newArtist,
+            venue: newVenue,
+            type: newType
+        });
+
         dom.addForm.reset();
         dom.addSetlistArea.innerHTML = renderSetlistEditor([], 'add');
         dom.addMsg.textContent = "✅ 追加しました！";
@@ -495,12 +479,16 @@ dom.addForm.addEventListener('submit', async (e) => {
     }
 });
 
-// --- 詳細表示 / 編集 / 削除 ---
-
-// Modal Open
 window.openModal = (id) => {
     const record = liveRecords.find(r => r.id === id);
     if (!record) return;
+
+    // ★詳細閲覧イベントの送信
+    analytics.logEvent('view_live_detail', {
+        live_name: record.liveName,
+        artist: record.artist,
+        venue: record.venue
+    });
 
     renderDetailView(record);
 
@@ -514,9 +502,7 @@ window.openModal = (id) => {
     document.body.style.overflow = 'hidden';
 };
 
-// Render Read-Only View
 function renderDetailView(record) {
-    // ボタン設定 (ログイン時のみ)
     dom.editButtons.innerHTML = '';
     if (isUserLoggedIn) {
         dom.editButtons.innerHTML = `
@@ -556,7 +542,6 @@ function renderDetailView(record) {
             <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">${record.liveName}</h2>
             <p class="text-xl text-blue-600 font-semibold mt-1">${record.artist}</p>
         </div>
-        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
                 <p class="text-xs text-gray-500 font-bold uppercase">Venue</p>
@@ -567,20 +552,16 @@ function renderDetailView(record) {
                 <p class="font-medium">${record.seatType || '-'}</p>
             </div>
         </div>
-
         ${record.image ? `<img src="${record.image}" class="w-full rounded-lg shadow mb-4 object-cover max-h-96">` : ''}
         ${record.ticketImage ? `<div class="mb-4"><p class="text-xs font-bold text-gray-500 mb-1">TICKET</p><img src="${record.ticketImage}" class="w-full rounded-lg shadow border object-cover max-h-60"></div>` : ''}
-        
         ${setlistHtml}
     `;
 }
 
-// Enter Edit Mode
 window.enterEditMode = (id) => {
     const record = liveRecords.find(r => r.id === id);
     if (!record) return;
-
-    dom.editButtons.innerHTML = ''; // Hide buttons during edit
+    dom.editButtons.innerHTML = '';
     dom.modalContent.innerHTML = `
         <h2 class="text-xl font-bold mb-4 border-b pb-2">編集モード</h2>
         <form onsubmit="event.preventDefault(); saveEditedRecord('${record.id}');">
@@ -596,7 +577,6 @@ window.enterEditMode = (id) => {
                 <div><label class="block text-sm font-bold text-gray-700">会場</label><input id="editVenue" value="${record.venue}" class="w-full p-2 border rounded"></div>
                 <div><label class="block text-sm font-bold text-gray-700">座席</label><input id="editSeatType" value="${record.seatType||''}" class="w-full p-2 border rounded"></div>
             </div>
-            
             <div class="mb-4">
                 <label class="block text-sm font-bold text-gray-700">種別</label>
                 <select id="editType" class="w-full p-2 border rounded">
@@ -605,7 +585,6 @@ window.enterEditMode = (id) => {
                     <option value="other" ${record.type==='other'?'selected':''}>その他</option>
                 </select>
             </div>
-
             <div class="mb-4 text-sm bg-gray-50 p-3 rounded">
                 <p class="font-bold mb-1">画像更新 (空欄なら変更なし)</p>
                 <label class="block text-xs text-gray-500">ライブ画像</label>
@@ -613,9 +592,7 @@ window.enterEditMode = (id) => {
                 <label class="block text-xs text-gray-500">チケット画像</label>
                 <input id="editTicketImageFile" type="file" accept="image/*" class="w-full">
             </div>
-
             <div class="mb-6">${renderSetlistEditor(record.setlist, 'edit')}</div>
-
             <div class="flex space-x-3">
                 <button class="flex-1 bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700">保存</button>
                 <button type="button" onclick="openModal('${record.id}')" class="flex-1 bg-gray-300 text-gray-800 font-bold py-2 rounded hover:bg-gray-400">キャンセル</button>
@@ -623,25 +600,19 @@ window.enterEditMode = (id) => {
             <p id="editMessage" class="text-center text-sm mt-2 font-bold"></p>
         </form>
     `;
-    
-    // スクロール位置をトップへ
     dom.detailModal.querySelector('.max-w-2xl').scrollTop = 0;
 };
 
-// Save Edit
 window.saveEditedRecord = async (id) => {
     const editMsg = document.getElementById('editMessage');
     editMsg.textContent = "保存中...";
     editMsg.className = "text-center text-sm mt-2 font-bold text-blue-600";
-    
     try {
         const record = liveRecords.find(r => r.id === id);
         const imageFile = document.getElementById('editImageFile').files[0];
         const ticketFile = document.getElementById('editTicketImageFile').files[0];
-        
         let imageUrl = record.image;
         let ticketUrl = record.ticketImage;
-        
         if (imageFile) imageUrl = await uploadImageFile(imageFile);
         if (ticketFile) ticketUrl = await uploadImageFile(ticketFile);
         
@@ -656,11 +627,13 @@ window.saveEditedRecord = async (id) => {
             image: imageUrl,
             ticketImage: ticketUrl
         };
-        
         await db.collection('liveRecords').doc(id).update(updatedData);
+
+        // ★編集イベントの送信
+        analytics.logEvent('edit_live_record', { artist: updatedData.artist });
+
         editMsg.textContent = "完了！";
         setTimeout(() => openModal(id), 500);
-        
     } catch (e) {
         console.error(e);
         editMsg.textContent = "エラー: " + e.message;
@@ -668,7 +641,6 @@ window.saveEditedRecord = async (id) => {
     }
 };
 
-// Modal Close
 window.closeModal = (event) => {
     if (event && event.target !== dom.detailModal) return;
     dom.detailModal.classList.remove('opacity-100');
@@ -681,7 +653,6 @@ window.closeModal = (event) => {
     }, 300);
 };
 
-// Delete Logic
 window.openDeleteConfirmModal = (id) => {
     recordToDeleteId = id;
     dom.deleteModal.classList.remove('hidden');
@@ -693,12 +664,13 @@ window.closeDeleteConfirmModal = () => {
 dom.confirmDeleteBtn.addEventListener('click', async () => {
     if (recordToDeleteId) {
         await db.collection('liveRecords').doc(recordToDeleteId).delete();
+        // ★削除イベントの送信
+        analytics.logEvent('delete_live_record');
         closeDeleteConfirmModal();
         closeModal();
     }
 });
 
-// --- フィルタ & リスト表示 ---
 function populateVenueFilter() {
     const currentVal = dom.filterVenue.value;
     const venues = [...new Set(liveRecords.map(r => r.venue).filter(Boolean))].sort();
@@ -721,7 +693,6 @@ function filterRecords() {
     
     dom.upcomingList.innerHTML = '';
     dom.pastList.innerHTML = '';
-    
     let upCount = 0, pastCount = 0;
     
     filtered.forEach(rec => {
@@ -729,9 +700,7 @@ function filterRecords() {
         const isUpcoming = d >= now;
         const list = isUpcoming ? dom.upcomingList : dom.pastList;
         if(isUpcoming) upCount++; else pastCount++;
-        
         const dateStr = rec.date.split('-');
-        
         const el = document.createElement('div');
         el.className = `bg-white rounded-xl shadow hover:shadow-xl transition-all cursor-pointer overflow-hidden transform hover:-translate-y-1 ${isUpcoming ? 'border-t-4 border-blue-500' : 'border-t-4 border-gray-400 opacity-90 hover:opacity-100'}`;
         el.onclick = () => openModal(rec.id);
@@ -754,13 +723,9 @@ function filterRecords() {
         `;
         list.appendChild(el);
     });
-    
-    // Pastを新しい順に並べ替え
     const pastItems = Array.from(dom.pastList.children).reverse();
     dom.pastList.innerHTML = '';
     pastItems.forEach(i => dom.pastList.appendChild(i));
-    
-    // 表示制御
     document.getElementById('noResults').classList.toggle('hidden', upCount + pastCount > 0);
     document.getElementById('upcomingTitle').classList.toggle('hidden', upCount === 0);
     document.getElementById('pastTitle').classList.toggle('hidden', pastCount === 0);
@@ -768,7 +733,6 @@ function filterRecords() {
     dom.pastList.classList.toggle('hidden', pastCount === 0);
 }
 
-// イベントリスナー設定
 dom.toggleAddBtn.addEventListener('click', () => {
     dom.addSection.classList.toggle('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -777,7 +741,6 @@ dom.toggleFilterBtn.addEventListener('click', () => dom.filterArea.classList.tog
 dom.searchKeyword.addEventListener('input', filterRecords);
 dom.filterVenue.addEventListener('change', filterRecords);
 
-// 初期化
 window.onload = () => {
     startRealtimeListener();
 };
