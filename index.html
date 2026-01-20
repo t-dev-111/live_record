@@ -13,7 +13,6 @@
         ::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-track { background-color: #f8fafc; }
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
-        /* ロード時のちらつき防止 */
         .auth-hidden { display: none !important; }
     </style>
 </head>
@@ -39,18 +38,13 @@
 <main class="max-w-4xl mx-auto p-4">
 
     <div id="addRecordSection" class="bg-white p-6 rounded-xl shadow-2xl mb-8 hidden border-l-4 border-blue-500">
-        
         <div id="loginContainer">
             <h2 class="text-xl font-bold text-gray-800 mb-2">管理者ログイン</h2>
             <p class="text-sm text-gray-500 mb-4">編集・追加を行うにはログインしてください。</p>
             <form id="loginForm" onsubmit="handleLogin(event)">
-                <input id="loginEmail" type="email" placeholder="メールアドレス" required
-                       class="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                <input id="loginPassword" type="password" placeholder="パスワード" required
-                       class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                <button type="submit" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-lg transition-colors">
-                    ログイン
-                </button>
+                <input id="loginEmail" type="email" placeholder="メールアドレス" required class="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <input id="loginPassword" type="password" placeholder="パスワード" required class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <button type="submit" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-lg transition-colors">ログイン</button>
                 <p id="loginMessage" class="mt-3 text-sm text-red-500 font-bold text-center"></p>
             </form>
         </div>
@@ -99,11 +93,18 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">座席 / 整理番号</label>
                         <input id="newSeatType" type="text" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">関連URL (公式、レポなど)</label>
+                        <input id="newUrl" type="url" placeholder="https://..." class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">チケット画像</label>
                         <input id="newTicketImageFile" type="file" accept="image/*" class="w-full p-2 border rounded-lg bg-gray-50 text-sm">
@@ -127,8 +128,7 @@
     <div id="filterArea" class="bg-white p-4 rounded-xl shadow-md mb-8 hidden md:block">
         <h2 class="text-sm font-bold text-gray-500 mb-2 uppercase tracking-wide">Search & Filter</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input type="text" id="searchKeyword" placeholder="🔍 キーワード検索 (曲名, アーティスト...)" 
-                   class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full">
+            <input type="text" id="searchKeyword" placeholder="🔍 キーワード検索 (曲名, アーティスト...)" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full">
             <select id="filterVenue" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full cursor-pointer">
                 <option value="">🏠 全ての会場</option>
             </select>
@@ -151,15 +151,12 @@
     <div class="bg-white w-full max-w-2xl max-h-[90vh] rounded-xl shadow-2xl overflow-y-auto transform scale-95 opacity-0 transition-all duration-300 flex flex-col" onclick="event.stopPropagation()">
         <div class="p-6 flex-grow">
             <div class="flex justify-between items-start mb-4">
-                <div id="editButtons" class="flex space-x-2">
-                    </div>
+                <div id="editButtons" class="flex space-x-2"></div>
                 <button class="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors" onclick="closeModal()">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            
-            <div id="modalContent">
-                </div>
+            <div id="modalContent"></div>
         </div>
     </div>
 </div>
@@ -182,7 +179,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics-compat.js"></script>
 
 <script>
-// --- Firebase Config ---
 const firebaseConfig = {
   apiKey: "AIzaSyBDA4-gNmZzTdUkGQdDhesr2-yP9cfdHMw",
   authDomain: "livememo-219c5.firebaseapp.com",
@@ -193,30 +189,22 @@ const firebaseConfig = {
   measurementId: "G-JKQBLYY5JP"
 };
 
-// Initialize Firebase
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore();
 const storage = firebase.storage();
 const auth = firebase.auth();
-// ★アナリティクスの初期化（自動的にページビュー計測が開始されます）
 const analytics = firebase.analytics();
 
-// グローバル変数
 let liveRecords = [];
 let unsubscribe = null;
 let recordToDeleteId = null;
 let isUserLoggedIn = false;
 
-// DOM要素の取得
 const dom = {
     addSection: document.getElementById('addRecordSection'),
     toggleAddBtn: document.getElementById('toggleAddForm'),
     loginContainer: document.getElementById('loginContainer'),
     authContent: document.getElementById('authContent'),
-    loginForm: document.getElementById('loginForm'),
-    loginMsg: document.getElementById('loginMessage'),
     logoutBtn: document.getElementById('logoutBtn'),
     addForm: document.getElementById('addRecordForm'),
     addMsg: document.getElementById('addMessage'),
@@ -234,14 +222,6 @@ const dom = {
     confirmDeleteBtn: document.getElementById('confirmDeleteBtn')
 };
 
-// --- 初期データ (DB空の場合のみ使用) ---
-const initialRecords = [
-    { id: '1', type: "live", date: "2022-05-01", liveName: "Actor Tour 2022", artist: "緑黄色社会", venue: "福岡サンパレス", seatType: "1階 10列 1番" },
-    { id: '2', type: "live", date: "2024-11-10", liveName: "YOASOBI DOME LIVE 2024", artist: "YOASOBI", venue: "東京ドーム", seatType: "バルコニー席" },
-    { id: '3', type: "event", date: "2025-04-06", liveName: "Echoes Baa", artist: "YOASOBI/FRUITS ZIPPER etc", venue: "横浜赤レンガ倉庫", seatType: "" }
-];
-
-// --- Auth 監視 ---
 auth.onAuthStateChanged(user => {
     isUserLoggedIn = !!user;
     updateAuthUI(user);
@@ -269,27 +249,13 @@ window.handleLogin = (e) => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value;
     const pass = document.getElementById('loginPassword').value;
-    dom.loginMsg.textContent = "認証中...";
-    
     auth.signInWithEmailAndPassword(email, pass)
-        .then(() => {
-            // ★ログイン成功イベント
-            analytics.logEvent('login', { method: 'email' });
-            dom.loginMsg.textContent = "";
-            document.getElementById('loginPassword').value = "";
-        })
-        .catch(err => {
-            console.error(err);
-            dom.loginMsg.textContent = "ログイン失敗: メールアドレスまたはパスワードが違います。";
-        });
+        .then(() => { analytics.logEvent('login', { method: 'email' }); })
+        .catch(err => { document.getElementById('loginMessage').textContent = "ログイン失敗。確認してください。"; });
 };
 
 dom.logoutBtn.addEventListener('click', () => {
-    if(confirm("ログアウトしますか？")){
-        auth.signOut().then(() => {
-            dom.addSection.classList.add('hidden');
-        });
-    }
+    if(confirm("ログアウトしますか？")){ auth.signOut().then(() => dom.addSection.classList.add('hidden')); }
 });
 
 function startRealtimeListener() {
@@ -298,7 +264,7 @@ function startRealtimeListener() {
         liveRecords = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         populateVenueFilter();
         filterRecords();
-    }, err => console.error('Snapshot error:', err));
+    });
 }
 
 async function uploadImageFile(file) {
@@ -308,31 +274,22 @@ async function uploadImageFile(file) {
         const ref = storage.ref().child(path);
         await ref.put(file);
         return await ref.getDownloadURL();
-    } catch(e) {
-        console.error("Upload failed", e);
-        alert("画像のアップロードに失敗しました。ログイン状態を確認してください。");
-        return '';
-    }
+    } catch(e) { return ''; }
 }
 
 const renderSetlistEditor = (setlist, mode) => {
     const containerId = `${mode}SetlistEditorContainer`;
     const inputId = `${mode}NewSongInput`;
-    const customSectionInputId = `${mode}NewSectionInput`;
-
     const itemsHtml = (setlist || []).map((item, index) => {
         const isSection = item.type === 'section';
         const numDisplay = isSection ? '-' : `${index + 1}.`;
         const styleClass = isSection ? 'font-bold text-blue-600 bg-blue-50' : 'text-gray-700';
-        
         return `
         <div class="flex items-center space-x-2 mb-2 setlist-item group">
             <span class="text-gray-400 font-bold w-6 text-right text-xs">${numDisplay}</span>
-            <input type="text" value="${item.title}" 
-                   class="flex-grow p-2 border border-gray-300 rounded text-sm ${styleClass} setlist-song-input">
+            <input type="text" value="${item.title}" class="flex-grow p-2 border border-gray-300 rounded text-sm ${styleClass} setlist-song-input">
             <input type="hidden" class="setlist-type-input" value="${item.type}">
-            <button type="button" onclick="removeSetlistItem(this, '${containerId}')" 
-                    class="text-red-400 hover:text-red-600 p-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">✖</button>
+            <button type="button" onclick="removeSetlistItem(this, '${containerId}')" class="text-red-400 hover:text-red-600 p-2 opacity-100 group-hover:opacity-100 transition-opacity">✖</button>
         </div>`;
     }).join('');
 
@@ -340,218 +297,116 @@ const renderSetlistEditor = (setlist, mode) => {
     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm">
         <label class="block font-bold text-gray-700 mb-2">セットリスト / メモ</label>
         <div id="${containerId}" class="mb-3">${itemsHtml}</div>
-        
         <div class="flex space-x-2 border-b pb-3 border-gray-200 mb-3">
-            <input type="text" id="${inputId}" placeholder="曲名を入力" 
-                   class="flex-grow p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                   onkeydown="if(event.key==='Enter'){event.preventDefault(); addSetlistItem('${mode}');}">
-            <button type="button" onclick="addSetlistItem('${mode}')" 
-                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold whitespace-nowrap">追加</button>
+            <input type="text" id="${inputId}" placeholder="曲名を入力" class="flex-grow p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addSetlistItem('${mode}');}">
+            <button type="button" onclick="addSetlistItem('${mode}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold whitespace-nowrap">追加</button>
         </div>
-        
-        <div>
-            <p class="text-xs text-gray-500 mb-2 font-bold">区切り（セクション）を追加:</p>
-            <div class="flex flex-wrap gap-2 mb-2">
-                <button type="button" onclick="addSection('${mode}', 'アンコール')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-xs">アンコール</button>
-                <button type="button" onclick="addSection('${mode}', '衣装替え')" class="bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded text-xs">衣装替え</button>
-                <button type="button" onclick="addSection('${mode}', 'MC')" class="bg-teal-500 hover:bg-teal-600 text-white px-2 py-1 rounded text-xs">MC</button>
-            </div>
-            <div class="flex space-x-2">
-                <input type="text" id="${customSectionInputId}" placeholder="自由入力 (例: 第2部)" 
-                       class="flex-grow p-1 px-2 border border-gray-300 rounded text-xs"
-                       onkeydown="if(event.key==='Enter'){event.preventDefault(); addCustomSection('${mode}');}">
-                <button type="button" onclick="addCustomSection('${mode}')" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-xs whitespace-nowrap">追加</button>
-            </div>
+        <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="addSection('${mode}', 'アンコール')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-xs">アンコール</button>
+            <button type="button" onclick="addSection('${mode}', 'MC')" class="bg-teal-500 hover:bg-teal-600 text-white px-2 py-1 rounded text-xs">MC</button>
         </div>
     </div>`;
 };
 
 window.addSetlistItem = (mode) => {
     const input = document.getElementById(`${mode}NewSongInput`);
-    const val = input.value.trim();
-    if (!val) return;
-    appendItemHTML(mode, val, 'song');
-    input.value = '';
-    input.focus();
+    if (!input.value.trim()) return;
+    appendItemHTML(mode, input.value.trim(), 'song');
+    input.value = ''; input.focus();
 };
 window.addSection = (mode, title) => { appendItemHTML(mode, title, 'section'); };
-window.addCustomSection = (mode) => {
-    const input = document.getElementById(`${mode}NewSectionInput`);
-    const val = input.value.trim();
-    if (!val) return;
-    appendItemHTML(mode, val, 'section');
-    input.value = '';
-};
 function appendItemHTML(mode, title, type) {
-    const containerId = `${mode}SetlistEditorContainer`;
-    const container = document.getElementById(containerId);
+    const container = document.getElementById(`${mode}SetlistEditorContainer`);
     const div = document.createElement('div');
     div.className = 'flex items-center space-x-2 mb-2 setlist-item group';
-    const styleClass = type === 'section' ? 'font-bold text-blue-600 bg-blue-50' : 'text-gray-700';
-    div.innerHTML = `
-        <span class="text-gray-400 font-bold w-6 text-right text-xs">-</span>
-        <input type="text" value="${title}" class="flex-grow p-2 border border-gray-300 rounded text-sm ${styleClass} setlist-song-input">
+    div.innerHTML = `<span class="text-gray-400 font-bold w-6 text-right text-xs">-</span>
+        <input type="text" value="${title}" class="flex-grow p-2 border border-gray-300 rounded text-sm ${type==='section'?'font-bold text-blue-600 bg-blue-50':''} setlist-song-input">
         <input type="hidden" class="setlist-type-input" value="${type}">
-        <button type="button" onclick="removeSetlistItem(this, '${containerId}')" class="text-red-400 hover:text-red-600 p-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">✖</button>
-    `;
+        <button type="button" onclick="removeSetlistItem(this, '${mode}SetlistEditorContainer')" class="text-red-400 hover:text-red-600 p-2">✖</button>`;
     container.appendChild(div);
-    renumberSetlist(containerId);
+    renumberSetlist(`${mode}SetlistEditorContainer`);
 }
-window.removeSetlistItem = (btn, containerId) => {
-    btn.closest('.setlist-item').remove();
-    renumberSetlist(containerId);
-};
-const renumberSetlist = (containerId) => {
-    const container = document.getElementById(containerId);
+window.removeSetlistItem = (btn, containerId) => { btn.closest('.setlist-item').remove(); renumberSetlist(containerId); };
+const renumberSetlist = (id) => {
     let songCount = 0;
-    container.querySelectorAll('.setlist-item').forEach(item => {
-        const type = item.querySelector('.setlist-type-input').value;
-        const span = item.querySelector('span');
-        if (type === 'song') {
-            songCount++;
-            span.textContent = `${songCount}.`;
-        } else {
-            span.textContent = '-';
-        }
+    document.getElementById(id).querySelectorAll('.setlist-item').forEach(item => {
+        const isSong = item.querySelector('.setlist-type-input').value === 'song';
+        item.querySelector('span').textContent = isSong ? `${++songCount}.` : '-';
     });
 };
-const getSetlistData = (mode) => {
-    const container = document.getElementById(`${mode}SetlistEditorContainer`);
-    if(!container) return [];
-    return Array.from(container.querySelectorAll('.setlist-item')).map(item => {
-        return {
-            title: item.querySelector('.setlist-song-input').value.trim(),
-            type: item.querySelector('.setlist-type-input').value
-        };
-    }).filter(i => i.title);
-};
+const getSetlistData = (mode) => Array.from(document.getElementById(`${mode}SetlistEditorContainer`).querySelectorAll('.setlist-item')).map(item => ({
+    title: item.querySelector('.setlist-song-input').value.trim(),
+    type: item.querySelector('.setlist-type-input').value
+})).filter(i => i.title);
 
 dom.addForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!isUserLoggedIn) { alert("ログインしてください"); return; }
-    
-    const newType = document.querySelector('input[name="newType"]:checked').value;
-    const newDate = document.getElementById('newDate').value;
-    const newLiveName = document.getElementById('newLiveName').value.trim();
-    const newArtist = document.getElementById('newArtist').value.trim();
-    const newVenue = document.getElementById('newVenue').value.trim();
-    
-    if(!newDate || !newLiveName || !newArtist || !newVenue) return;
-    
+    if (!isUserLoggedIn) return;
     dom.addMsg.textContent = "送信中...";
-    dom.addMsg.className = "mt-3 text-center text-sm font-bold text-blue-600";
-    
     try {
         const ticketUrl = await uploadImageFile(document.getElementById('newTicketImageFile').files[0]);
         const imageUrl = await uploadImageFile(document.getElementById('newImageFile').files[0]);
-        const setlist = getSetlistData('add');
-        
-        await db.collection('liveRecords').add({
-            type: newType,
-            date: newDate,
-            liveName: newLiveName,
-            artist: newArtist,
-            venue: newVenue,
+        const recordData = {
+            type: document.querySelector('input[name="newType"]:checked').value,
+            date: document.getElementById('newDate').value,
+            liveName: document.getElementById('newLiveName').value.trim(),
+            artist: document.getElementById('newArtist').value.trim(),
+            venue: document.getElementById('newVenue').value.trim(),
+            url: document.getElementById('newUrl').value.trim(), // URL追加
             seatType: document.getElementById('newSeatType').value,
             image: imageUrl,
             ticketImage: ticketUrl,
-            setlist: setlist,
+            setlist: getSetlistData('add'),
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        // ★記録追加イベントの送信
-        analytics.logEvent('add_live_record', {
-            artist: newArtist,
-            venue: newVenue,
-            type: newType
-        });
-
+        };
+        await db.collection('liveRecords').add(recordData);
         dom.addForm.reset();
         dom.addSetlistArea.innerHTML = renderSetlistEditor([], 'add');
-        dom.addMsg.textContent = "✅ 追加しました！";
-        dom.addMsg.className = "mt-3 text-center text-sm font-bold text-green-600";
-        setTimeout(() => { dom.addMsg.textContent = ""; }, 3000);
-        
-    } catch(err) {
-        console.error(err);
-        dom.addMsg.textContent = "❌ エラーが発生しました: " + err.message;
-        dom.addMsg.className = "mt-3 text-center text-sm font-bold text-red-600";
-    }
+        dom.addMsg.textContent = "✅ 追加完了！";
+        setTimeout(() => dom.addMsg.textContent = "", 3000);
+    } catch(err) { dom.addMsg.textContent = "❌ エラー: " + err.message; }
 });
 
 window.openModal = (id) => {
     const record = liveRecords.find(r => r.id === id);
     if (!record) return;
-
-    // ★詳細閲覧イベントの送信
-    analytics.logEvent('view_live_detail', {
-        live_name: record.liveName,
-        artist: record.artist,
-        venue: record.venue
-    });
-
     renderDetailView(record);
-
     dom.detailModal.classList.remove('hidden');
     setTimeout(() => {
         dom.detailModal.classList.add('opacity-100');
-        const box = dom.detailModal.querySelector('.max-w-2xl');
-        box.classList.replace('scale-95', 'scale-100');
-        box.classList.replace('opacity-0', 'opacity-100');
+        dom.detailModal.querySelector('.max-w-2xl').classList.replace('scale-95', 'scale-100');
+        dom.detailModal.querySelector('.max-w-2xl').classList.replace('opacity-0', 'opacity-100');
     }, 10);
     document.body.style.overflow = 'hidden';
 };
 
 function renderDetailView(record) {
-    dom.editButtons.innerHTML = '';
-    if (isUserLoggedIn) {
-        dom.editButtons.innerHTML = `
-            <button onclick="enterEditMode('${record.id}')" class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold py-2 px-4 rounded shadow">編集</button>
-            <button onclick="openDeleteConfirmModal('${record.id}')" class="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-4 rounded shadow">削除</button>
-        `;
-    }
-
-    const typeBadges = {
-        live: '<span class="bg-blue-100 text-blue-800 text-sm font-bold px-2 py-1 rounded">🎤 LIVE</span>',
-        event: '<span class="bg-orange-100 text-orange-800 text-sm font-bold px-2 py-1 rounded">🎪 EVENT</span>',
-        other: '<span class="bg-green-100 text-green-800 text-sm font-bold px-2 py-1 rounded">🎸 OTHER</span>'
-    };
+    dom.editButtons.innerHTML = isUserLoggedIn ? `<button onclick="enterEditMode('${record.id}')" class="bg-yellow-500 text-white text-sm font-bold py-2 px-4 rounded shadow">編集</button><button onclick="openDeleteConfirmModal('${record.id}')" class="bg-red-500 text-white text-sm font-bold py-2 px-4 rounded shadow">削除</button>` : '';
+    
+    // 関連URLボタンの生成
+    const urlButton = record.url ? `<div class="mb-6"><a href="${record.url}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-3 px-4 rounded-lg border border-blue-200 transition-colors">🔗 関連リンク / 公式サイト</a></div>` : '';
 
     let setlistHtml = '';
     if (record.setlist && record.setlist.length > 0) {
         let count = 0;
-        setlistHtml = `
-            <div class="mt-6 pt-4 border-t border-gray-200">
-                <h3 class="font-bold text-gray-700 mb-3">🎵 セットリスト / メモ</h3>
-                <ul class="space-y-2 text-sm">
-                    ${record.setlist.map(item => {
-                        if(item.type === 'section') return `<li class="font-bold text-blue-600 mt-3 border-b border-blue-100 pb-1">${item.title}</li>`;
-                        count++;
-                        return `<li class="flex"><span class="w-6 text-gray-400 text-right mr-2">${count}.</span><span class="text-gray-800">${item.title}</span></li>`;
-                    }).join('')}
-                </ul>
-            </div>`;
+        setlistHtml = `<div class="mt-6 pt-4 border-t border-gray-200"><h3 class="font-bold text-gray-700 mb-3">🎵 セットリスト / メモ</h3><ul class="space-y-2 text-sm">${record.setlist.map(item => {
+            if(item.type === 'section') return `<li class="font-bold text-blue-600 mt-3 border-b border-blue-100 pb-1">${item.title}</li>`;
+            return `<li class="flex"><span class="w-6 text-gray-400 text-right mr-2">${++count}.</span><span class="text-gray-800">${item.title}</span></li>`;
+        }).join('')}</ul></div>`;
     }
 
     dom.modalContent.innerHTML = `
         <div class="mb-4">
-            <div class="flex items-center mb-2 space-x-2">
-                ${typeBadges[record.type] || typeBadges.live}
-                <span class="text-gray-500 text-sm">${record.date}</span>
-            </div>
-            <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">${record.liveName}</h2>
-            <p class="text-xl text-blue-600 font-semibold mt-1">${record.artist}</p>
+            <span class="bg-blue-100 text-blue-800 text-sm font-bold px-2 py-1 rounded">${record.type.toUpperCase()}</span>
+            <span class="text-gray-500 text-sm ml-2">${record.date}</span>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mt-2">${record.liveName}</h2>
+            <p class="text-xl text-blue-600 font-semibold">${record.artist}</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                <p class="text-xs text-gray-500 font-bold uppercase">Venue</p>
-                <p class="font-medium">${record.venue}</p>
-            </div>
-            <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                <p class="text-xs text-gray-500 font-bold uppercase">Seat</p>
-                <p class="font-medium">${record.seatType || '-'}</p>
-            </div>
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-gray-50 p-3 rounded-lg"><p class="text-xs text-gray-500 font-bold">VENUE</p><p class="font-medium">${record.venue}</p></div>
+            <div class="bg-gray-50 p-3 rounded-lg"><p class="text-xs text-gray-500 font-bold">SEAT</p><p class="font-medium">${record.seatType || '-'}</p></div>
         </div>
+        ${urlButton}
         ${record.image ? `<img src="${record.image}" class="w-full rounded-lg shadow mb-4 object-cover max-h-96">` : ''}
         ${record.ticketImage ? `<div class="mb-4"><p class="text-xs font-bold text-gray-500 mb-1">TICKET</p><img src="${record.ticketImage}" class="w-full rounded-lg shadow border object-cover max-h-60"></div>` : ''}
         ${setlistHtml}
@@ -560,15 +415,10 @@ function renderDetailView(record) {
 
 window.enterEditMode = (id) => {
     const record = liveRecords.find(r => r.id === id);
-    if (!record) return;
     dom.editButtons.innerHTML = '';
-    dom.modalContent.innerHTML = `
-        <h2 class="text-xl font-bold mb-4 border-b pb-2">編集モード</h2>
+    dom.modalContent.innerHTML = `<h2 class="text-xl font-bold mb-4 border-b pb-2">編集モード</h2>
         <form onsubmit="event.preventDefault(); saveEditedRecord('${record.id}');">
-            <div class="mb-4">
-                <label class="block text-sm font-bold text-gray-700">タイトル</label>
-                <input id="editLiveName" value="${record.liveName}" class="w-full p-2 border rounded">
-            </div>
+            <div class="mb-4"><label class="block text-sm font-bold text-gray-700">タイトル</label><input id="editLiveName" value="${record.liveName}" class="w-full p-2 border rounded"></div>
             <div class="grid grid-cols-2 gap-3 mb-4">
                 <div><label class="block text-sm font-bold text-gray-700">日付</label><input type="date" id="editDate" value="${record.date}" class="w-full p-2 border rounded"></div>
                 <div><label class="block text-sm font-bold text-gray-700">アーティスト</label><input id="editArtist" value="${record.artist}" class="w-full p-2 border rounded"></div>
@@ -577,106 +427,57 @@ window.enterEditMode = (id) => {
                 <div><label class="block text-sm font-bold text-gray-700">会場</label><input id="editVenue" value="${record.venue}" class="w-full p-2 border rounded"></div>
                 <div><label class="block text-sm font-bold text-gray-700">座席</label><input id="editSeatType" value="${record.seatType||''}" class="w-full p-2 border rounded"></div>
             </div>
-            <div class="mb-4">
-                <label class="block text-sm font-bold text-gray-700">種別</label>
-                <select id="editType" class="w-full p-2 border rounded">
-                    <option value="live" ${record.type==='live'?'selected':''}>ライブ</option>
-                    <option value="event" ${record.type==='event'?'selected':''}>イベント</option>
-                    <option value="other" ${record.type==='other'?'selected':''}>その他</option>
-                </select>
-            </div>
+            <div class="mb-4"><label class="block text-sm font-bold text-gray-700">関連URL</label><input id="editUrl" type="url" value="${record.url||''}" class="w-full p-2 border rounded"></div>
             <div class="mb-4 text-sm bg-gray-50 p-3 rounded">
-                <p class="font-bold mb-1">画像更新 (空欄なら変更なし)</p>
-                <label class="block text-xs text-gray-500">ライブ画像</label>
+                <p class="font-bold mb-1">画像更新 (空欄なら維持)</p>
                 <input id="editImageFile" type="file" accept="image/*" class="mb-2 w-full">
-                <label class="block text-xs text-gray-500">チケット画像</label>
                 <input id="editTicketImageFile" type="file" accept="image/*" class="w-full">
             </div>
             <div class="mb-6">${renderSetlistEditor(record.setlist, 'edit')}</div>
-            <div class="flex space-x-3">
-                <button class="flex-1 bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700">保存</button>
-                <button type="button" onclick="openModal('${record.id}')" class="flex-1 bg-gray-300 text-gray-800 font-bold py-2 rounded hover:bg-gray-400">キャンセル</button>
-            </div>
+            <div class="flex space-x-3"><button class="flex-1 bg-blue-600 text-white font-bold py-2 rounded">保存</button><button type="button" onclick="openModal('${record.id}')" class="flex-1 bg-gray-300 text-gray-800 font-bold py-2 rounded">中止</button></div>
             <p id="editMessage" class="text-center text-sm mt-2 font-bold"></p>
-        </form>
-    `;
-    dom.detailModal.querySelector('.max-w-2xl').scrollTop = 0;
+        </form>`;
 };
 
 window.saveEditedRecord = async (id) => {
     const editMsg = document.getElementById('editMessage');
     editMsg.textContent = "保存中...";
-    editMsg.className = "text-center text-sm mt-2 font-bold text-blue-600";
     try {
         const record = liveRecords.find(r => r.id === id);
         const imageFile = document.getElementById('editImageFile').files[0];
         const ticketFile = document.getElementById('editTicketImageFile').files[0];
-        let imageUrl = record.image;
-        let ticketUrl = record.ticketImage;
-        if (imageFile) imageUrl = await uploadImageFile(imageFile);
-        if (ticketFile) ticketUrl = await uploadImageFile(ticketFile);
-        
         const updatedData = {
             liveName: document.getElementById('editLiveName').value.trim(),
             date: document.getElementById('editDate').value,
             artist: document.getElementById('editArtist').value.trim(),
             venue: document.getElementById('editVenue').value.trim(),
             seatType: document.getElementById('editSeatType').value,
-            type: document.getElementById('editType').value,
+            url: document.getElementById('editUrl').value.trim(), // URL更新
             setlist: getSetlistData('edit'),
-            image: imageUrl,
-            ticketImage: ticketUrl
+            image: imageFile ? await uploadImageFile(imageFile) : record.image,
+            ticketImage: ticketFile ? await uploadImageFile(ticketFile) : record.ticketImage
         };
         await db.collection('liveRecords').doc(id).update(updatedData);
-
-        // ★編集イベントの送信
-        analytics.logEvent('edit_live_record', { artist: updatedData.artist });
-
-        editMsg.textContent = "完了！";
-        setTimeout(() => openModal(id), 500);
-    } catch (e) {
-        console.error(e);
-        editMsg.textContent = "エラー: " + e.message;
-        editMsg.className = "text-center text-sm mt-2 font-bold text-red-600";
-    }
+        openModal(id);
+    } catch (e) { editMsg.textContent = "エラー: " + e.message; }
 };
 
-window.closeModal = (event) => {
-    if (event && event.target !== dom.detailModal) return;
+window.closeModal = (e) => {
+    if (e && e.target !== dom.detailModal) return;
     dom.detailModal.classList.remove('opacity-100');
-    const box = dom.detailModal.querySelector('.max-w-2xl');
-    box.classList.replace('scale-100', 'scale-95');
-    box.classList.replace('opacity-100', 'opacity-0');
-    setTimeout(() => {
-        dom.detailModal.classList.add('hidden');
-        document.body.style.overflow = '';
-    }, 300);
+    dom.detailModal.querySelector('.max-w-2xl').classList.replace('scale-100', 'scale-95');
+    setTimeout(() => { dom.detailModal.classList.add('hidden'); document.body.style.overflow = ''; }, 300);
 };
 
-window.openDeleteConfirmModal = (id) => {
-    recordToDeleteId = id;
-    dom.deleteModal.classList.remove('hidden');
-};
-window.closeDeleteConfirmModal = () => {
-    recordToDeleteId = null;
-    dom.deleteModal.classList.add('hidden');
-};
+window.openDeleteConfirmModal = (id) => { recordToDeleteId = id; dom.deleteModal.classList.remove('hidden'); };
+window.closeDeleteConfirmModal = () => { recordToDeleteId = null; dom.deleteModal.classList.add('hidden'); };
 dom.confirmDeleteBtn.addEventListener('click', async () => {
-    if (recordToDeleteId) {
-        await db.collection('liveRecords').doc(recordToDeleteId).delete();
-        // ★削除イベントの送信
-        analytics.logEvent('delete_live_record');
-        closeDeleteConfirmModal();
-        closeModal();
-    }
+    if (recordToDeleteId) { await db.collection('liveRecords').doc(recordToDeleteId).delete(); closeDeleteConfirmModal(); closeModal(); }
 });
 
 function populateVenueFilter() {
-    const currentVal = dom.filterVenue.value;
     const venues = [...new Set(liveRecords.map(r => r.venue).filter(Boolean))].sort();
-    dom.filterVenue.innerHTML = '<option value="">🏠 全ての会場</option>' + 
-        venues.map(v => `<option value="${v}">${v}</option>`).join('');
-    dom.filterVenue.value = currentVal;
+    dom.filterVenue.innerHTML = '<option value="">🏠 全ての会場</option>' + venues.map(v => `<option value="${v}">${v}</option>`).join('');
 }
 
 function filterRecords() {
@@ -685,65 +486,36 @@ function filterRecords() {
     const now = new Date(); now.setHours(0,0,0,0);
     
     const filtered = liveRecords.filter(r => {
-        const textMatch = [r.liveName, r.artist, r.venue, r.seatType || ''].some(txt => txt.toLowerCase().includes(keyword)) ||
-                          (r.setlist || []).some(s => s.title.toLowerCase().includes(keyword));
-        const venueMatch = !venueFilter || r.venue === venueFilter;
-        return textMatch && venueMatch;
+        const textMatch = [r.liveName, r.artist, r.venue].some(txt => txt.toLowerCase().includes(keyword)) || (r.setlist || []).some(s => s.title.toLowerCase().includes(keyword));
+        return textMatch && (!venueFilter || r.venue === venueFilter);
     }).sort((a,b) => new Date(a.date) - new Date(b.date));
     
-    dom.upcomingList.innerHTML = '';
-    dom.pastList.innerHTML = '';
-    let upCount = 0, pastCount = 0;
-    
+    dom.upcomingList.innerHTML = ''; dom.pastList.innerHTML = '';
     filtered.forEach(rec => {
-        const d = new Date(rec.date);
-        const isUpcoming = d >= now;
-        const list = isUpcoming ? dom.upcomingList : dom.pastList;
-        if(isUpcoming) upCount++; else pastCount++;
+        const isUpcoming = new Date(rec.date) >= now;
         const dateStr = rec.date.split('-');
         const el = document.createElement('div');
-        el.className = `bg-white rounded-xl shadow hover:shadow-xl transition-all cursor-pointer overflow-hidden transform hover:-translate-y-1 ${isUpcoming ? 'border-t-4 border-blue-500' : 'border-t-4 border-gray-400 opacity-90 hover:opacity-100'}`;
+        el.className = `bg-white rounded-xl shadow p-5 cursor-pointer transform hover:-translate-y-1 transition-all border-t-4 ${isUpcoming?'border-blue-500':'border-gray-400 opacity-90'}`;
         el.onclick = () => openModal(rec.id);
-        el.innerHTML = `
-            <div class="p-5">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-xs font-bold px-2 py-1 rounded ${rec.type==='event'?'bg-orange-100 text-orange-800':rec.type==='other'?'bg-green-100 text-green-800':'bg-blue-100 text-blue-800'}">
-                        ${rec.type.toUpperCase()}
-                    </span>
-                    <span class="text-xs text-gray-400 font-mono">${dateStr[0]}</span>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 leading-tight mb-1 line-clamp-2">${rec.liveName}</h3>
-                <div class="text-2xl font-extrabold text-gray-700 mb-2">${dateStr[1]}/${dateStr[2]}</div>
-                <div class="flex items-center text-sm text-gray-500">
-                    <span class="truncate max-w-[150px] mr-2 text-blue-600 font-semibold">${rec.artist}</span>
-                    <span class="text-gray-300">@</span>
-                    <span class="truncate ml-2">${rec.venue}</span>
-                </div>
-            </div>
-        `;
-        list.appendChild(el);
+        el.innerHTML = `<div class="flex justify-between text-xs font-bold mb-2"><span class="px-2 py-1 rounded bg-blue-100 text-blue-800">${rec.type.toUpperCase()}</span><span class="text-gray-400 font-mono">${dateStr[0]}</span></div>
+            <h3 class="text-xl font-bold text-gray-900 leading-tight mb-1 line-clamp-2">${rec.liveName}</h3>
+            <div class="text-2xl font-extrabold text-gray-700 mb-2">${dateStr[1]}/${dateStr[2]}</div>
+            <div class="flex items-center text-sm text-gray-500 truncate"><span class="text-blue-600 font-semibold mr-1">${rec.artist}</span> @ ${rec.venue}</div>`;
+        (isUpcoming ? dom.upcomingList : dom.pastList).appendChild(el);
     });
+    // 過去分は降順（新しい順）にする
     const pastItems = Array.from(dom.pastList.children).reverse();
     dom.pastList.innerHTML = '';
     pastItems.forEach(i => dom.pastList.appendChild(i));
-    document.getElementById('noResults').classList.toggle('hidden', upCount + pastCount > 0);
-    document.getElementById('upcomingTitle').classList.toggle('hidden', upCount === 0);
-    document.getElementById('pastTitle').classList.toggle('hidden', pastCount === 0);
-    dom.upcomingList.classList.toggle('hidden', upCount === 0);
-    dom.pastList.classList.toggle('hidden', pastCount === 0);
+    
+    document.getElementById('noResults').classList.toggle('hidden', filtered.length > 0);
 }
 
-dom.toggleAddBtn.addEventListener('click', () => {
-    dom.addSection.classList.toggle('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+dom.toggleAddBtn.addEventListener('click', () => { dom.addSection.classList.toggle('hidden'); window.scrollTo({top:0, behavior:'smooth'}); });
 dom.toggleFilterBtn.addEventListener('click', () => dom.filterArea.classList.toggle('hidden'));
 dom.searchKeyword.addEventListener('input', filterRecords);
 dom.filterVenue.addEventListener('change', filterRecords);
-
-window.onload = () => {
-    startRealtimeListener();
-};
+window.onload = startRealtimeListener;
 </script>
 </body>
 </html>
